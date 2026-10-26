@@ -1,2169 +1,1755 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#02050c">
-<title>欢迎来到 CMY 的领域</title>
+<meta charset="UTF-8">
+<!-- ★ 锁死缩放：子页面（孔明灯等）是 iframe 嵌进来的，
+     手指在 iframe 里捏合时 iOS/Android 缩放的是【顶层文档】，
+     所以顶层也要拦。 -->
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<title>无敌CMY网页</title>
+<!-- 网页图标：粉色爱心 -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.95em' font-size='92'>💝</text></svg>">
 <style>
-/* ══════════ 基础 ══════════ */
-/* 双主色：青 = 系统 / 品红 = 警示·异常 */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{
-  width:100%;height:100%;overflow:hidden;background:#02050c;
-  touch-action:pan-y;-ms-touch-action:pan-y;
-  -webkit-user-select:none;user-select:none;
-  /* ★ 字体栈：优先挑选笔画舒展、观感柔和的中文字体，
-       鸿蒙/思源黑体在安卓上比系统默认更耐看；iOS 用苹方。
-       antialiased 让笔画边缘更细腻，深色底上尤其明显。 */
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC",
-    "Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei","Heiti SC",sans-serif;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  text-rendering:optimizeLegibility;
-  color:#cfe3f5;
-}
-html,body,#wrap,#pv,#pvBar,.card,.mbtn,.pvbtn{touch-action:pan-y;-ms-touch-action:pan-y}
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#150e24;
+    --glass:rgba(255,255,255,.055);
+    --glass-h:rgba(255,255,255,.095);
+    --line:rgba(255,255,255,.10);
+    --txt:#f4f1f8;
+    --sub:rgba(244,241,248,.55);
+    --dim:rgba(244,241,248,.32);
+    --pink:#ff9fb5;
+    --purple:#c9a7ff;
+    --gold:#ffd79a;
+    --mint:#a8e6cf;
+  }
+  html{background:var(--bg);-webkit-text-size-adjust:100%}
+  /* ★ 只放行纵向滚动，不给 pinch-zoom / 双击放大留口子：
+     iOS Safari 10+ 无视 user-scalable=no，但 touch-action 是它认的。
+     不写 pinch-zoom 就等于禁止，列表上下滑不受影响。 */
+  html,body{ touch-action:pan-y; }
+  body{
+    min-height:100vh;color:var(--txt);
+    font-family:"PingFang SC","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    /* 浪漫夜空：粉紫金多层柔光 */
+    background:
+      radial-gradient(1100px 700px at 10% -10%, rgba(255,120,165,.24), transparent 60%),
+      radial-gradient(950px 680px at 90% 6%,   rgba(160,110,255,.22), transparent 60%),
+      radial-gradient(900px 700px at 50% 108%, rgba(255,180,130,.16), transparent 62%),
+      radial-gradient(1200px 900px at 50% 45%, rgba(90,50,130,.42),   transparent 72%),
+      linear-gradient(178deg,#1c1130 0%,#22143c 42%,#150d24 100%);
+    background-attachment:fixed;
+    /* 给底部浮层留位置，避免遮住最后一张卡片 */
+    padding:0 0 96px;
+    overflow-x:hidden;
+  }
+  /* 顶部渐变细光带 */
+  body::before{
+    content:"";position:fixed;top:0;left:0;right:0;height:1px;z-index:6;
+    background:linear-gradient(90deg,transparent,rgba(255,159,181,.6),rgba(201,167,255,.6),rgba(255,215,154,.5),transparent);
+  }
 
-/* ══════════ 深空底 ══════════ */
-#bg{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:0;overflow:hidden;
-  background:
-    /* 品红区：右下一大块，与青色区形成赛博朋克双色对峙（静态，零成本） */
-    radial-gradient(820px 620px at 88% 74%, rgba(190,25,85,.30), transparent 63%),
-    radial-gradient(520px 420px at 12% 26%, rgba(255,45,110,.16), transparent 66%),
-    radial-gradient(1100px 680px at 80% 6%, rgba(10,110,175,.32), transparent 62%),
-    radial-gradient(900px 600px at 8% 90%, rgba(85,35,180,.26), transparent 64%),
-    radial-gradient(760px 540px at 50% 44%, rgba(0,150,170,.16), transparent 66%),
-    /* 底色六段色阶：天顶偏蓝紫 → 中段墨蓝 → 底部近黑 */
-    linear-gradient(180deg,
-      #061024 0%, #04101f 14%, #030a17 30%,
-      #020712 52%, #040a18 74%, #010308 100%);
-}
-#neb{
-  position:fixed;top:-40%;left:-40%;width:180%;height:180%;z-index:1;
-  background:
-    radial-gradient(closest-side, rgba(94,240,255,.13), transparent 70%),
-    radial-gradient(closest-side, rgba(255,45,110,.14), transparent 70%);
-  background-repeat:no-repeat;
-  background-position:28% 32%, 72% 68%;
-  background-size:58% 58%, 52% 52%;
-  /* ★ 提升为合成层：否则每帧重绘两层大面积径向渐变 */
-  will-change:transform;
-  animation:drift 52s ease-in-out infinite alternate;
-  -webkit-animation:drift 52s ease-in-out infinite alternate;
-}
-/* ★ 只做 translate，不做 scale：
-      scale 会改变光栅化尺寸，导致两层大面积径向渐变每帧重画（很贵）。
-      纯平移只移动已光栅化的图层，成本极低。层已放大到 180% 保证不出边。 */
-@keyframes drift{
-  0%{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
-  100%{-webkit-transform:translate3d(4%,-4%,0);transform:translate3d(4%,-4%,0)}
-}
+  /* ── 爱心流星雨（背景）── */
+  #shower{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .drop{
+    position:absolute;top:-8vh;white-space:nowrap;
+    font-size:var(--fs);line-height:1;
+    animation:fall var(--dur) linear var(--delay) infinite;
+    opacity:0;will-change:transform,opacity;
+  }
+  .drop svg{width:1em;height:1em;vertical-align:middle;filter:drop-shadow(0 0 8px var(--g1))}
+  @keyframes fall{
+    0%  {transform:translate3d(0,-10vh,0) rotate(var(--r0));opacity:0}
+    8%  {opacity:var(--op)}
+    85% {opacity:var(--op)}
+    100%{transform:translate3d(var(--dx),112vh,0) rotate(var(--r1));opacity:0}
+  }
 
-/* ══════════ 科技感背景层 ══════════ */
-/* ★ 四层叠出"科技感"，全部是静态渐变 —— 光栅化一次之后不再重画，
-     所以视觉变丰富了，帧率却不会掉。
-     ① 斜向细纹：像屏幕的扫描纹理
-     ② 顶部青色辉光：从天顶洒下来
-     ③ 底部品红辉光：与顶部形成双色对峙
-     ④ 中央暗角：把视觉焦点收拢到标题和卡片
-     注意：这个层绝不能加动画 —— 大面积重复渐变一旦动起来，每帧都要重新光栅化。 */
-#bgTech{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;pointer-events:none;
-  background:
-    repeating-linear-gradient(115deg,
-      transparent 0 41px, rgba(94,240,255,.030) 41px 42px),
-    repeating-linear-gradient(-115deg,
-      transparent 0 83px, rgba(255,45,110,.020) 83px 84px),
-    linear-gradient(180deg, rgba(94,240,255,.13) 0%, rgba(94,240,255,.03) 16%, transparent 34%),
-    linear-gradient(0deg,  rgba(255,45,110,.11) 0%, rgba(190,25,85,.03) 18%, transparent 36%),
-    radial-gradient(115% 78% at 50% 42%, transparent 46%, rgba(1,3,8,.55) 100%);
-}
-/* 地平线光带：一道横向亮线，像能量地平线 */
-#bgHor{
-  position:fixed;left:0;right:0;bottom:calc(32% - 1px);height:2px;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,
-    transparent 0%, rgba(94,240,255,.30) 22%, rgba(190,240,255,.62) 50%,
-    rgba(94,240,255,.30) 78%, transparent 100%);
-}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
 
-#fx{position:fixed;top:0;left:0;z-index:2;display:block;pointer-events:none}
+  /* ══════ 顶部 Hero ══════ */
+  header{padding:clamp(40px,9vw,72px) 0 clamp(20px,4vw,30px);text-align:center}
+  .logo{
+    width:clamp(58px,15vw,70px);height:clamp(58px,15vw,70px);
+    margin:0 auto clamp(14px,3vw,20px);border-radius:22px;
+    display:flex;align-items:center;justify-content:center;font-size:clamp(26px,7vw,32px);
+    background:linear-gradient(140deg,rgba(255,159,181,.34),rgba(201,167,255,.30));
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 12px 34px rgba(255,120,165,.26), inset 0 1px 0 rgba(255,255,255,.24);
+    animation:floaty 5.5s ease-in-out infinite;
+  }
+  @keyframes floaty{
+    0%,100%{transform:translateY(0) rotate(-2deg)}
+    50%{transform:translateY(-7px) rotate(2deg)}
+  }
+  h1{
+    font-size:clamp(21px,5.4vw,30px);font-weight:700;letter-spacing:2px;line-height:1.35;
+    background:linear-gradient(100deg,#fff 8%,var(--pink) 46%,var(--purple) 82%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    padding:0 6px;
+  }
+  .sub{
+    margin-top:10px;font-size:clamp(12px,3.2vw,13.5px);
+    color:rgba(244,241,248,.46);letter-spacing:3px;
+  }
+  /* 问候：按时间变化的一句话 */
+  .greet{
+    margin-top:clamp(16px,4vw,22px);
+    display:inline-flex;align-items:center;gap:9px;
+    padding:8px 18px;border-radius:999px;
+    background:linear-gradient(135deg,rgba(255,159,181,.14),rgba(201,167,255,.11));
+    border:1px solid rgba(255,255,255,.11);
+    font-size:12.5px;color:rgba(255,225,238,.82);letter-spacing:1px;
+  }
+  .greet .dot{width:5px;height:5px;border-radius:50%;background:var(--pink);
+    box-shadow:0 0 8px var(--pink);animation:blink 2.4s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+  .count{
+    margin-top:14px;font-size:12px;color:var(--dim);letter-spacing:2px;
+  }
+  .count b{color:var(--pink);font-weight:600}
 
-/* 地平线网格 */
-#grid{
-  position:fixed;left:-30%;right:-30%;bottom:-30px;height:calc(32% + 30px);z-index:2;
-  pointer-events:none;opacity:.24;
-  background-image:
-    linear-gradient(rgba(94,240,255,.26) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(94,240,255,.18) 1px, transparent 1px);
-  background-size:100% 28px, 28px 100%;
-  will-change:transform;
-  /* ★ 不用 mask-image：动画元素上的遮罩每帧重算，是 PC 大屏的主要开销。
-     淡出效果交给下面静态的 #gridFade 覆盖层来做。 */
-  /* ★ 用 transform 平移而非 background-position：
-       后者每帧重绘整个（带 perspective 的）大面积元素，是 PC 大屏最大瓶颈。
-       translate 放在 rotateX 之后 = 沿倾斜平面移动，"向前推进"的视觉完全一样。 */
-  -webkit-transform:perspective(320px) rotateX(62deg) translate3d(0,0,0);
-  transform:perspective(320px) rotateX(62deg) translate3d(0,0,0);
-  transform-origin:bottom center;-webkit-transform-origin:bottom center;
-  animation:gridRun 8s linear infinite;
-  -webkit-animation:gridRun 8s linear infinite;
-}
-/* 平移 28px 刚好一个网格单元，循环无缝 */
-@keyframes gridRun{
-  0%{-webkit-transform:perspective(320px) rotateX(62deg) translate3d(0,0,0);
-     transform:perspective(320px) rotateX(62deg) translate3d(0,0,0)}
-  100%{-webkit-transform:perspective(320px) rotateX(62deg) translate3d(0,28px,0);
-     transform:perspective(320px) rotateX(62deg) translate3d(0,28px,0)}
-}
-/* 静态淡出层：盖在网格上方，让它上缘渐隐（不参与动画，零开销） */
-#gridFade{
-  position:fixed;left:-30%;right:-30%;bottom:-30px;height:calc(32% + 30px);z-index:2;
-  pointer-events:none;
-  -webkit-transform:perspective(320px) rotateX(62deg);
-  transform:perspective(320px) rotateX(62deg);
-  transform-origin:bottom center;-webkit-transform-origin:bottom center;
-  background:linear-gradient(to top, rgba(2,5,12,0) 0%, rgba(2,5,12,.55) 46%, rgba(2,5,12,1) 82%);
-}
+  /* ══════ 工具条 ══════ */
+  .bar{
+    display:flex;gap:10px;align-items:center;
+    margin:clamp(20px,5vw,30px) 0 0;flex-wrap:wrap;
+  }
+  .search{
+    flex:1 1 200px;min-width:0;display:flex;align-items:center;gap:9px;height:46px;
+    padding:0 16px;border-radius:16px;
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:border-color .25s, background .25s;
+  }
+  .search:focus-within{border-color:rgba(255,159,181,.5);background:var(--glass-h)}
+  .search input{
+    flex:1;min-width:0;background:none;border:none;outline:none;color:var(--txt);
+    font-size:14px;font-family:inherit;
+  }
+  .search input::placeholder{color:var(--dim)}
+  .btn{
+    height:46px;padding:0 18px;border-radius:16px;border:1px solid var(--line);
+    background:var(--glass);color:var(--txt);font-size:13.5px;font-family:inherit;
+    cursor:pointer;white-space:nowrap;transition:.22s;flex-shrink:0;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .btn:hover{background:var(--glass-h)}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--pink),var(--purple));
+    border:none;color:#2b2138;font-weight:700;
+    box-shadow:0 6px 20px rgba(255,120,165,.26);
+  }
+  .btn.primary:hover{box-shadow:0 10px 26px rgba(255,120,165,.36)}
+  .btn.ghost{padding:0;width:46px;font-size:16px;color:var(--sub)}
+  .btn.ghost.on{background:var(--glass-h);color:var(--pink)}
 
-/* 扫描线（横向光带） */
-#scan{
-  position:fixed;left:0;right:0;top:0;height:2px;z-index:3;pointer-events:none;opacity:.42;
-  background:linear-gradient(90deg,transparent,rgba(94,240,255,.85),transparent);
-  /* ★ 用 transform 而非 top：top 动画每帧触发布局，transform 可 GPU 合成 */
-  -webkit-transform:translate3d(0,-4px,0);transform:translate3d(0,-4px,0);
-  animation:scanRun 9s linear infinite;
-  -webkit-animation:scanRun 9s linear infinite;
-}
-@keyframes scanRun{
-  0%{-webkit-transform:translate3d(0,-4px,0);transform:translate3d(0,-4px,0)}
-  100%{-webkit-transform:translate3d(0,102vh,0);transform:translate3d(0,102vh,0)}
-}
+  /* ── 折叠的管理区：默认收起，不打扰浪漫氛围 ── */
+  .tools{
+    display:none;gap:10px;flex-wrap:wrap;
+    margin-top:10px;padding:12px;border-radius:16px;
+    background:rgba(0,0,0,.18);border:1px dashed rgba(255,255,255,.12);
+  }
+  .tools.show{display:flex}
+  .tools .btn{height:40px;padding:0 14px;font-size:12.5px;border-radius:12px}
+  .tools .tnote{
+    width:100%;font-size:11.5px;color:var(--dim);line-height:1.7;
+  }
 
-/* 第二道扫描线：品红，与青色错开时间 —— 常驻的双色张力 */
-#scan2{
-  position:fixed;left:0;right:0;top:0;height:1px;z-index:3;pointer-events:none;opacity:.34;
-  background:linear-gradient(90deg,transparent,rgba(255,45,110,.9),transparent);
-  -webkit-transform:translate3d(0,-4px,0);transform:translate3d(0,-4px,0);
-  animation:scanRun 11s linear infinite reverse;
-  -webkit-animation:scanRun 11s linear infinite reverse;
-}
+  /* ══════ 卡片 ══════ */
+  .grid{
+    display:grid;gap:16px;margin-top:clamp(20px,5vw,26px);
+    grid-template-columns:repeat(auto-fill,minmax(236px,1fr));
+  }
+  .card{
+    position:relative;padding:20px;border-radius:22px;cursor:pointer;
+    display:block;text-decoration:none;color:inherit;overflow:hidden;
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    transition:transform .32s cubic-bezier(.2,.9,.3,1),background .3s,border-color .3s,box-shadow .3s;
+    animation:rise .5s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+  /* 顶部柔光，hover 时跟随指针 */
+  .card::before{
+    content:"";position:absolute;inset:-1px;border-radius:inherit;opacity:0;
+    background:radial-gradient(420px 210px at var(--mx,50%) var(--my,0%),rgba(255,159,181,.17),transparent 70%);
+    transition:opacity .3s;pointer-events:none;z-index:0;
+  }
+  /* 左侧渐变条 */
+  .card::after{
+    content:"";position:absolute;left:0;top:18%;bottom:18%;width:3px;
+    border-radius:0 3px 3px 0;opacity:.55;
+    background:linear-gradient(180deg,var(--pink),var(--purple));
+    transition:opacity .3s, top .3s, bottom .3s;
+  }
+  /* 只在真正支持悬停的设备上应用 hover，避免触屏"粘住" */
+  @media(hover:hover) and (pointer:fine){
+    .card:hover{
+      transform:translateY(-6px);background:var(--glass-h);
+      border-color:rgba(255,159,181,.38);
+      box-shadow:0 18px 40px rgba(0,0,0,.34),0 0 0 1px rgba(255,159,181,.10);
+    }
+    .card:hover::before{opacity:1}
+    .card:hover::after{opacity:1;top:10%;bottom:10%}
+    .card:hover .ico{transform:scale(1.07) rotate(-5deg)}
+    .card:hover .edit{opacity:1}
+  }
+  .card:active{transform:translateY(-2px) scale(.99)}
+  .card > *{position:relative;z-index:1}
 
-/* ══════════ CRT 扫描线纹理（覆盖全屏，很淡）══════════ */
-#crt{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:25;pointer-events:none;
-  opacity:.055;
-  background:repeating-linear-gradient(0deg,
-    rgba(120,220,255,.9) 0px, rgba(120,220,255,.9) 1px,
-    transparent 1px, transparent 3px);
-}
-#crtBeam{
-  position:fixed;left:0;right:0;top:0;height:26%;z-index:26;pointer-events:none;opacity:.05;
-  background:linear-gradient(180deg,transparent,rgba(150,235,255,.9),transparent);
-  -webkit-transform:translate3d(0,-30vh,0);transform:translate3d(0,-30vh,0);
-  animation:beamRun 12s linear infinite;
-  -webkit-animation:beamRun 12s linear infinite;
-}
-@keyframes beamRun{
-  0%{-webkit-transform:translate3d(0,-30vh,0);transform:translate3d(0,-30vh,0)}
-  100%{-webkit-transform:translate3d(0,110vh,0);transform:translate3d(0,110vh,0)}
-}
+  .ico{
+    width:48px;height:48px;border-radius:15px;margin-bottom:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22);transition:transform .3s;
+  }
+  .card h3{
+    font-size:16.5px;font-weight:650;margin-bottom:7px;letter-spacing:.3px;
+    padding-right:36px;line-height:1.35;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .card p{
+    font-size:13px;color:var(--sub);line-height:1.55;min-height:20px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .meta{
+    display:flex;align-items:center;gap:8px;margin-top:15px;
+    font-size:11.5px;color:var(--dim);min-width:0;
+  }
+  .chip{
+    padding:3.5px 10px;border-radius:8px;letter-spacing:.3px;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .edit{
+    position:absolute;top:15px;right:15px;width:28px;height:28px;border-radius:9px;
+    border:none;background:rgba(255,255,255,.08);color:var(--sub);
+    font-size:13px;cursor:pointer;transition:.22s;line-height:1;
+    display:flex;align-items:center;justify-content:center;z-index:2;
+  }
+  /* 触屏没有 hover → 常驻显示，否则永远点不到 */
+  @media(hover:none),(pointer:coarse){
+    .edit{opacity:.75;background:rgba(255,255,255,.12)}
+  }
+  @media(hover:hover) and (pointer:fine){
+    .edit{opacity:0}
+  }
+  .edit:hover{background:rgba(255,159,181,.24);color:var(--pink)}
 
-/* ══════════ 四角 HUD 括号 ══════════ */
-.cn{
-  position:fixed;z-index:5;width:22px;height:22px;pointer-events:none;opacity:.5;
-}
-.cn i{position:absolute;background:#5ef0ff;display:block}
-.cn i.h{width:22px;height:1px;left:0}
-.cn i.v{width:1px;height:22px;top:0}
-#cnTL{top:calc(env(safe-area-inset-top,0px) + 60px);left:12px}
-#cnTR{top:calc(env(safe-area-inset-top,0px) + 60px);right:12px}
-#cnBL{bottom:30px;left:12px}
-#cnBR{bottom:30px;right:12px}
-#cnTL i.h{top:0}#cnTL i.v{left:0}
-#cnTR i.h{top:0}#cnTR i.v{right:0}
-#cnBL i.h{bottom:0}#cnBL i.v{left:0}
-#cnBR i.h{bottom:0}#cnBR i.v{right:0}
-/* 对角用品红，制造双色张力 */
-#cnTR i,#cnBL i{background:#ff2d6e}
+  /* ══════ 空状态 ══════ */
+  .empty{
+    text-align:center;padding:clamp(48px,12vw,72px) 20px;
+    color:var(--sub);line-height:2;
+    background:var(--glass);border:1px solid var(--line);border-radius:24px;
+    margin-top:24px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .empty .big{font-size:46px;margin-bottom:14px;opacity:.8;animation:floaty 4s ease-in-out infinite}
 
-/* ══════════ 左侧刻度尺 ══════════ */
-#ruler{
-  position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:5;
-  height:34%;width:9px;pointer-events:none;opacity:.42;
-  background-image:linear-gradient(90deg,rgba(94,240,255,.8) 0 4px,transparent 4px);
-  background-size:100% 7px;background-repeat:repeat-y;
-}
-#ruler:before{
-  content:"";position:absolute;left:0;top:0;width:1px;height:100%;
-  background:rgba(94,240,255,.55);
-}
-@media (max-width:600px){ #ruler{display:none} #cnBL,#cnBR{display:none} }
+  /* ══════ 提示卡 ══════ */
+  .tips{
+    margin-top:26px;padding:18px 20px;border-radius:20px;
+    font-size:13px;color:var(--sub);line-height:2;
+    background:linear-gradient(135deg,rgba(255,159,181,.09),rgba(201,167,255,.07));
+    border:1px solid rgba(255,255,255,.09);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    text-align:center;
+  }
+  .tips b{color:var(--pink);font-weight:600}
+  .tips .tl{display:block;font-size:14px;color:rgba(255,225,238,.8);letter-spacing:1px;margin-bottom:6px}
 
+  .diag{
+    margin-top:16px;padding:14px 16px;border-radius:14px;font-size:12px;line-height:1.9;
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--mint);
+    background:rgba(0,0,0,.32);border:1px solid var(--line);
+    white-space:pre-wrap;word-break:break-all;display:none;max-height:320px;overflow:auto;
+  }
+  .diag.on{display:block}
 
+  /* ══════ 弹窗 ══════ */
+  .mask{
+    position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(8,5,14,.74);z-index:100;
+    display:none;align-items:center;justify-content:center;padding:20px;
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  }
+  .mask.on{display:flex;animation:fade .2s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{
+    width:100%;max-width:400px;max-height:86vh;overflow:auto;border-radius:24px;padding:24px;
+    background:#221f34;border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 26px 70px rgba(0,0,0,.62);
+    animation:pop .3s cubic-bezier(.2,1.1,.3,1);
+  }
+  @keyframes pop{from{transform:scale(.9) translateY(14px);opacity:0}to{transform:none;opacity:1}}
+  .modal h2{font-size:17px;margin-bottom:18px;font-weight:650}
+  .fld{margin-bottom:13px}
+  .fld label{display:block;font-size:12px;color:var(--sub);margin-bottom:7px}
+  .fld input{
+    width:100%;height:44px;padding:0 13px;border-radius:12px;
+    background:rgba(0,0,0,.28);border:1px solid var(--line);color:var(--txt);
+    font-size:14px;font-family:inherit;outline:none;transition:.2s;
+  }
+  .fld input:focus{border-color:var(--pink);background:rgba(0,0,0,.40)}
+  .fld input:disabled{opacity:.55}
+  .emojis{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+  .emojis button{
+    width:38px;height:38px;border-radius:11px;font-size:18px;cursor:pointer;
+    background:rgba(255,255,255,.06);border:1px solid var(--line);transition:.18s;
+  }
+  .emojis button:hover{background:rgba(255,255,255,.14)}
+  .emojis button.on{border-color:var(--pink);background:rgba(255,159,181,.22)}
+  .row{display:flex;gap:10px;margin-top:20px}
+  .row .btn{flex:1}
+  .note{
+    font-size:11.5px;color:var(--dim);line-height:1.7;margin-top:10px;
+    background:rgba(255,159,181,.08);padding:10px 12px;border-radius:10px;
+  }
 
-/* ══════════ HUD 顶栏 ══════════ */
-#hud{
-  position:fixed;top:0;left:0;right:0;z-index:7;height:52px;
-  padding:calc(env(safe-area-inset-top,0px)) 14px 0;
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  background:rgba(2,5,12,.76);
-  border-bottom:1px solid rgba(94,240,255,.15);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  pointer-events:none;
-}
-.hudL,.hudR{display:flex;align-items:center;gap:9px}
-.dot{width:7px;height:7px;border-radius:50%;background:#5ef0ff;
-  box-shadow:0 0 9px #5ef0ff;animation:blink 2.4s ease-in-out infinite;
-  -webkit-animation:blink 2.4s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.32}}
-.hudT{font-size:10px;letter-spacing:1.6px;color:#5a86ad;
-  font-family:ui-monospace,Menlo,Consolas,monospace}
-.hudT b{color:#8fd4ee;font-weight:600}
-/* 信号强度条 */
-#sig{display:flex;align-items:flex-end;gap:2px;height:11px}
-#sig i{width:2px;background:#5ef0ff;opacity:.35;display:block}
-#sig i:nth-child(1){height:4px}
-#sig i:nth-child(2){height:6px}
-#sig i:nth-child(3){height:8px}
-#sig i:nth-child(4){height:11px}
-#sig i.on{opacity:1;box-shadow:0 0 4px #5ef0ff}
+  /* ══════ 音乐 ══════ */
+  #music{
+    position:fixed;right:16px;top:16px;z-index:100;
+    width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.08);backdrop-filter:blur(12px);
+    color:var(--txt);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 22px rgba(0,0,0,.3), 0 0 0 0 rgba(255,159,181,.35);
+    transition:.25s;
+  }
+  #music:hover{background:rgba(255,255,255,.15);transform:scale(1.06)}
+  /* 播放中：旋转 + 粉色光晕（复用 JS 已有的 .spin，无需改主逻辑） */
+  #music.spin{
+    animation:spin 4s linear infinite;
+    border-color:rgba(255,159,181,.5);
+    box-shadow:0 6px 22px rgba(0,0,0,.3), 0 0 18px rgba(255,159,181,.45);
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #music.off{opacity:.5}
+  #mpanel{
+    position:fixed;right:16px;top:72px;z-index:100;width:230px;
+    max-height:calc(100vh - 100px);overflow:auto;
+    background:rgba(34,31,52,.96);backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:14px;
+    box-shadow:0 16px 46px rgba(0,0,0,.52);display:none;
+    animation:pop .26s cubic-bezier(.2,1.1,.3,1);color:var(--txt);
+  }
+  #mpanel.on{display:block}
+  #mpanel h4{font-size:12.5px;color:var(--pink);margin-bottom:10px;font-weight:700;letter-spacing:1px}
+  #mpanel .mitem{
+    padding:9px 11px;border-radius:12px;font-size:12.5px;color:var(--sub);cursor:pointer;
+    transition:.18s;margin-bottom:4px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  #mpanel .mitem:hover{background:rgba(255,159,181,.16)}
+  #mpanel .mitem.on{
+    background:linear-gradient(135deg,rgba(255,159,181,.28),rgba(201,167,255,.24));
+    color:var(--txt);font-weight:700;
+  }
+  #mpanel .sep{height:1px;background:rgba(255,255,255,.09);margin:10px 0}
+  /* 当前播放曲目 */
+  #mnow{
+    font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:10px;
+    padding:9px 11px;border-radius:12px;
+    background:linear-gradient(135deg,rgba(255,159,181,.16),rgba(201,167,255,.12));
+    border:1px solid rgba(255,159,181,.22);
+  }
+  #mnow .lb{display:block;font-size:10.5px;color:var(--dim);letter-spacing:1px;margin-bottom:3px}
+  #mnow .nm{
+    display:block;font-weight:700;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  /* 上一首 / 下一首 */
+  .mnav{display:flex;align-items:center;gap:8px}
+  .mbtn{
+    flex-shrink:0;width:38px;height:38px;border-radius:12px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);
+    color:var(--txt);font-size:14px;transition:.2s;
+  }
+  .mbtn:hover{background:rgba(255,159,181,.22);border-color:rgba(255,159,181,.4)}
+  .mbtn:active{transform:scale(.94)}
+  .mseq{
+    flex:1;text-align:right;font-size:11px;color:var(--dim);letter-spacing:.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  #mpanel label{font-size:11.5px;color:var(--dim);display:block;margin-bottom:6px}
+  #mpanel input[type=file]{font-size:11px;width:100%;color:var(--sub)}
+  #mpanel .hint{font-size:11px;color:var(--dim);line-height:1.6;margin-top:8px}
+  #mpanel .vol{width:100%;accent-color:#ff8fb5}
+  #mpanel .pbtn{
+    width:100%;height:38px;margin-top:12px;border-radius:13px;cursor:pointer;
+    border:1px solid rgba(255,159,181,.4);
+    background:linear-gradient(135deg,rgba(255,159,181,.22),rgba(201,167,255,.18));
+    color:var(--pink);font-size:13px;font-weight:700;font-family:inherit;transition:.2s;
+  }
+  #mpanel .pbtn:hover{background:linear-gradient(135deg,rgba(255,159,181,.4),rgba(201,167,255,.34))}
 
-/* 底部数据条 */
-#tick{
-  position:fixed;left:0;right:0;bottom:0;z-index:6;height:20px;overflow:hidden;
-  background:rgba(2,5,12,.82);border-top:1px solid rgba(94,240,255,.12);
-  pointer-events:none;
-}
-#tickIn{
-  position:absolute;top:0;left:0;white-space:nowrap;
-  font-family:ui-monospace,Menlo,Consolas,monospace;
-  font-size:9px;line-height:20px;color:#3f6c8c;letter-spacing:1.4px;
-  animation:tickRun 38s linear infinite;
-  -webkit-animation:tickRun 38s linear infinite;
-}
-@keyframes tickRun{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  /* 开启音乐浮层 */
+  #mstart{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);z-index:110;
+    display:none;align-items:center;gap:9px;
+    padding:12px 22px;border-radius:999px;cursor:pointer;
+    background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#2b2138;font-size:14px;font-weight:700;
+    box-shadow:0 10px 30px rgba(255,120,165,.42);white-space:nowrap;
+    animation:breathe 2.2s ease-in-out infinite;
+  }
+  #mstart.show{display:flex}
+  #mstart.hide{display:none!important}
+  @keyframes breathe{
+    0%,100%{transform:translateX(-50%) scale(1)}
+    50%{transform:translateX(-50%) scale(1.05)}
+  }
+  #mstart .mi{font-size:17px;animation:spin 3s linear infinite}
+  #mstart:active{transform:translateX(-50%) scale(.96)}
 
-/* ══════════ 滚动区 ══════════ */
-#wrap{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:4;
-  overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:calc(env(safe-area-inset-top,0px) + 60px) 16px calc(env(safe-area-inset-bottom,0px) + 40px);
-}
+  /* ══════ 全屏预览 ══════ */
+  #pv{
+    position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:200;display:none;flex-direction:column;
+    background:rgba(10,8,16,.98);
+    padding:env(safe-area-inset-top,0) 0 0;
+  }
+  #pv.on{display:flex}
+  .pvtop{
+    display:flex;align-items:center;gap:8px;padding:10px 12px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(255,159,181,.10),rgba(0,0,0,.28));
+    flex-shrink:0;
+  }
+  .pvtop b{
+    flex:1;min-width:0;font-size:14px;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .pvtop .btn{height:38px;padding:0 12px;font-size:12.5px;border-radius:12px;flex-shrink:0}
+  /* ★ 原来是 background:#fff —— iframe 空白时（刚打开还没渲染完、
+     或关闭时被置空）会闪一大片白，这就是"退出时出现白色页面"的直接观感。
+     改成深色后即使空白也是和预览层一致的暗色，看不出闪烁。 */
+  /* ★ 预览层与 iframe 上禁掉一切浏览器手势：
+     子页面（孔明灯等）嵌在 iframe 里，手指在 iframe 内捏合时
+     浏览器缩放的是【顶层文档】也就是本页 —— 顶层收不到 iframe 内的
+     touchmove，所以只能靠 touch-action 在命中测试阶段就把它挡掉。
+     pan-y 表示只允许纵向滚动，pinch-zoom / 双击放大都不允许。 */
+  #pv, #pv, #pvF{ touch-action:none; }
+  #pvF{flex:1;width:100%;border:none;background:transparent;color-scheme:dark;display:block;min-height:0}
+  body.pvopen #music{display:none}
+  body.pvopen #mstart{display:none!important}
 
-/* ══════════ 标题（含故障效果）══════════ */
-#head{text-align:center;margin:26px 0 24px}
-#ttlWrap{animation:glitch 7.5s steps(1,end) infinite;-webkit-animation:glitch 7.5s steps(1,end) infinite}
-@keyframes glitch{
-  0%,92%,100%{transform:translate(0,0) skewX(0);opacity:1}
-  93%{transform:translate(-3px,1px) skewX(-6deg);opacity:.9}
-  94%{transform:translate(3px,-1px) skewX(5deg);opacity:1}
-  95%{transform:translate(-2px,0) skewX(-3deg);opacity:.85}
-  96%{transform:translate(0,0) skewX(0);opacity:1}
-}
-/* ★ 主标题用【静态】渐变：
-     background-position 动画一旦挂在 background-clip:text 的元素上，
-     每帧都要重算文字裁剪路径并重绘渐变 —— 实测单独吃掉 5.8fps。
-     静态渐变完全够"高科技"，流动效果交给副标题（小元素，成本低得多）。 */
-#ttl{
-  font-size:44px;font-weight:900;letter-spacing:15px;line-height:1.15;padding-left:15px;
-  background:linear-gradient(96deg,#5ef0ff 0%,#7fe8ff 18%,#8fa8ff 34%,#c07cff 52%,#ff2d6e 70%,#a9f4ff 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  -webkit-text-fill-color:transparent;
-  position:relative;
-}
-/* ★ 辉光改由 #ttlWrap 上的一层静态径向渐变承担（不用 filter）。
-     filter:drop-shadow 一旦挂在跑动画的元素上，每帧都要重新光栅化再算阴影，
-     实测单独就吃掉 10~19fps —— 这是整页最大的单项开销。 */
-/* 辉光不再单独加层：实测这层大面积 radial-gradient 又吃掉 5fps，不划算。
-   标题本身就是青→紫→品红的亮色渐变，在深色底上已经足够跳。 */
-#ttlWrap{position:relative}
-#ttl span{display:inline-block;opacity:0;transform:translateY(16px) scale(.92);
-  animation:ttlIn .85s cubic-bezier(.16,1,.3,1) forwards;
-  -webkit-animation:ttlIn .85s cubic-bezier(.16,1,.3,1) forwards}
-@keyframes ttlIn{to{opacity:1;transform:translateY(0) scale(1)}}
-/* 故障色带 */
-#ttl:after{
-  content:"";position:absolute;left:0;right:0;top:38%;height:16%;
-  background:rgba(255,45,110,.55);opacity:0;pointer-events:none;
-  animation:glitchBar 7.5s steps(1,end) infinite;
-  -webkit-animation:glitchBar 7.5s steps(1,end) infinite;
-}
-@keyframes glitchBar{0%,92%,100%{opacity:0}93%{opacity:.5;transform:translateX(-6px)}
-  94%{opacity:.45;transform:translateX(7px)}95%{opacity:0}}
-/* 副标题：渐变文字 + 一道高光横向扫过（科技感的关键一笔）*/
-#sub{
-  margin-top:14px;font-size:15.5px;font-weight:600;letter-spacing:4.5px;padding-left:4.5px;
-  background:linear-gradient(96deg,#5ef0ff 0%,#7fd8ff 24%,#a58cff 50%,#ff2d6e 76%,#5ef0ff 100%);
-  background-size:220% 100%;
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  -webkit-text-fill-color:transparent;
-  opacity:0;
-  animation:fadeUp .8s ease .5s forwards,subFlow 7s linear .5s infinite;
-  -webkit-animation:fadeUp .8s ease .5s forwards,subFlow 7s linear .5s infinite;
-}
-@keyframes subFlow{from{background-position:0% 50%}to{background-position:220% 50%}}
-/* ★ 兜底：极老内核不认 background-clip:text，
-   color:transparent + text-fill-color:transparent 会让字【彻底消失】。
-   必须先检测，不支持就退回纯色 + 外发光。 */
-@supports not ((-webkit-background-clip:text) or (background-clip:text)){
-  #ttl{color:#5ef0ff;-webkit-text-fill-color:#5ef0ff;background:none;
-       text-shadow:0 0 14px rgba(94,240,255,.5)}
-  #sub{color:#7fb8d8;-webkit-text-fill-color:#7fb8d8;background:none}
-  #greetDate{color:#5ef0ff;-webkit-text-fill-color:#5ef0ff;background:none}
-  #greetMsg{color:#6fc4e8;-webkit-text-fill-color:#6fc4e8;background:none}
-  #greetMsg b{color:#5ef0ff;-webkit-text-fill-color:#5ef0ff}
-  #quote{color:#8fd8f4;-webkit-text-fill-color:#8fd8f4;background:none;
-         text-shadow:0 0 12px rgba(94,240,255,.28)}
-  #quote em{color:#ff2d6e;-webkit-text-fill-color:#ff2d6e}
-}
-/* 运行时兜底（比 @supports 更可靠）：JS 检测到不支持就打上 .noclip */
-html.noclip #ttl,html.noclip #sub{
-  background:none !important;-webkit-background-clip:border-box !important;
-  background-clip:border-box !important;
-}
-html.noclip #ttl{color:#5ef0ff !important;-webkit-text-fill-color:#5ef0ff !important;
-  text-shadow:0 0 14px rgba(94,240,255,.5)}
-html.noclip #sub{color:#7fb8d8 !important;-webkit-text-fill-color:#7fb8d8 !important}
-html.noclip #greetDate{color:#5ef0ff !important;-webkit-text-fill-color:#5ef0ff !important}
-html.noclip #greetMsg{color:#6fc4e8 !important;-webkit-text-fill-color:#6fc4e8 !important}
-html.noclip #greetMsg b{color:#5ef0ff !important;-webkit-text-fill-color:#5ef0ff !important}
-html.noclip #quote{color:#8fd8f4 !important;-webkit-text-fill-color:#8fd8f4 !important;
-  text-shadow:0 0 12px rgba(94,240,255,.28)}
-html.noclip #quote em{color:#ff2d6e !important;-webkit-text-fill-color:#ff2d6e !important}
-#sub:after{
-  content:"";display:block;height:1px;margin-top:6px;
-  background:linear-gradient(90deg,transparent,rgba(94,240,255,.45),rgba(255,45,110,.35),transparent);
-}
-#line{
-  width:170px;height:1px;margin:15px auto 0;
-  background:linear-gradient(90deg,transparent,rgba(94,240,255,.7),transparent);
-  opacity:0;animation:fadeUp .8s ease .72s forwards;
-  -webkit-animation:fadeUp .8s ease .72s forwards}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  /* ══════ 页脚 ══════ */
+  footer{
+    text-align:center;margin-top:clamp(34px,8vw,48px);
+    font-size:11.5px;letter-spacing:2px;color:var(--dim);line-height:2.1;
+  }
+  footer .fl{display:block;font-size:12.5px;color:rgba(255,215,230,.5);letter-spacing:3px;margin-bottom:4px}
+  footer .fh{font-size:11px;color:rgba(244,241,248,.22);letter-spacing:1px}
 
-/* ══════════ 每日一句 ══════════ */
-/* ★ 用纯色 + 外发光，不用 background-clip:text：
-     clip:text 挂在跑动画的元素上每帧都要重算文字裁剪路径，
-     （之前主标题的渐变流动就是这样吃掉 5.8fps 的）
-     静态小文字用纯色视觉几乎一样，成本却低得多。 */
-#quote{
-  margin:14px auto 0;max-width:300px;padding:0 14px;
-  text-align:center;font-size:13.5px;line-height:1.9;letter-spacing:1.3px;padding-left:16.3px;
-  /* 语录用渐变：青 → 淡蓝 → 紫，柔和不刺眼 */
-  background:linear-gradient(96deg,#7fe4ff 0%,#a9d6f5 38%,#b9b0ff 70%,#ff8fb8 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  -webkit-text-fill-color:transparent;
-  opacity:0;transform:translateY(8px);
-  animation:qIn 1s cubic-bezier(.16,1,.3,1) .95s forwards;
-  -webkit-animation:qIn 1s cubic-bezier(.16,1,.3,1) .95s forwards}
-@keyframes qIn{to{opacity:1;transform:translateY(0)}}
-/* 引号单独用品红，做一点撞色点缀 */
-#quote em{font-style:normal;color:#ff2d6e;-webkit-text-fill-color:#ff2d6e;
-  opacity:.8;margin:0 3px;font-weight:700}
+  /* ══════ 响应式 ══════ */
+  @media(max-width:600px){
+    .wrap{padding:0 15px}
+    .grid{grid-template-columns:1fr;gap:13px}
+    .card{padding:17px;border-radius:20px}
+    .bar{gap:8px}
+    .search{flex:1 1 100%;order:1}
+    .btn.primary{order:2;flex:1}
+    .btn.ghost{order:3}
+    #mpanel{width:min(210px,calc(100vw - 32px));right:10px}
+    #music{right:12px;top:12px}
+  }
+  @media(max-width:360px){
+    .grid{gap:11px}
+    .card{padding:15px}
+    .ico{width:42px;height:42px;font-size:21px}
+  }
+  /* 横屏矮屏：压缩垂直留白 */
+  @media(max-height:460px) and (orientation:landscape){
+    header{padding:22px 0 14px}
+    .logo{display:none}
+    body{padding-bottom:70px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .card,.modal,.mask,.logo,.empty .big,.drop{animation:none!important}
+    #mstart{animation:none}
+  }
 
-/* ══════════ 问候 / 造访记录 ══════════ */
-/* 渐变文字统一用「静态」渐变：
-   实测 background-position 动画挂在 clip:text 上会每帧重算文字裁剪路径，
-   主标题那样的大字能掉 6fps。静态渐变视觉几乎一样，成本却低得多。
-   只有副标题（字小、面窄）保留流动，因为那里便宜。 */
-#greet{
-  margin-top:12px;text-align:center;line-height:1.9;
-  opacity:0;animation:fadeUp .8s ease .86s forwards;
-  -webkit-animation:fadeUp .8s ease .86s forwards}
-#greetDate{
-  font-size:13px;font-weight:600;letter-spacing:1.8px;padding-left:1.8px;
-  background:linear-gradient(96deg,#5ef0ff 0%,#8fe6ff 34%,#a9a4ff 66%,#ff7bac 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  -webkit-text-fill-color:transparent}
-#greetMsg{
-  margin-top:4px;font-size:9.5px;letter-spacing:1.2px;padding-left:1.2px;
-  font-family:ui-monospace,Menlo,Consolas,monospace;
-  background:linear-gradient(96deg,#6fc4e8 0%,#8fa8d8 50%,#c07cff 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  -webkit-text-fill-color:transparent}
-#greetMsg b{font-weight:600;color:#5ef0ff;-webkit-text-fill-color:#5ef0ff}
+  /* ★ 老内核 gap 兜底：不支持 gap 的浏览器（部分 X5、旧 iOS Safari）
+     元素会全部粘在一起。用相邻兄弟 margin 顶上。
+     支持 gap 的浏览器两者会叠加 → 用 :not() 无法检测，
+     所以这里只在 @supports not (gap:1px) 生效，安全无副作用。 */
+  @supports not (gap: 1px){
+    .tools>*, .bar>*, .row>*, .emojis>*, .mnav>*{margin-left:8px;margin-top:4px}
+    .tools>*:first-child, .bar>*:first-child, .row>*:first-child,
+    .emojis>*:first-child, .mnav>*:first-child{margin-left:0}
+    .grid{gap:0}
+    .grid>*{margin:6px}
+  }
+  /* ★ clamp 兜底：不支持时用中间值 */
+  @supports not (font-size: clamp(1px,1vw,2px)){
+    .hero h1{font-size:30px}
+    .hero p{font-size:14px}
+    .grid{margin-top:22px}
+  }
 
-/* ★ 矮屏紧凑模式：
-     320×568 这类小屏上，头部原本要占 216px，卡片被挤到 335px 才出现，
-     首屏只看得见 1 张 —— 太挤了。矮屏下收紧各处间距，把卡片往上提。 */
-
-
-
-
-/* ══════════ 状态 ══════════ */
-#stat{
-  text-align:center;font-size:10px;letter-spacing:2.2px;color:#c9557f;margin-bottom:18px;
-  font-family:ui-monospace,Menlo,Consolas,monospace;min-height:15px}
-
-/* ══════════ 卡片 ══════════ */
-#cards{display:flex;flex-wrap:wrap;max-width:1080px;margin:0 auto}
-.card{
-  position:relative;width:calc(50% - 8px);margin:0 4px 13px;
-  padding:17px 15px 15px 18px;border-radius:3px;cursor:pointer;
-  background:linear-gradient(155deg,rgba(255,255,255,.085) 0%,rgba(255,255,255,.035) 55%,rgba(94,240,255,.06) 100%);
-  border:1px solid rgba(94,240,255,.22);
-  /* ★ 平时只留一道窄辉光：30 张卡片各带多层大 blur 阴影太贵（实测吃掉 6fps）。
-     强霓虹留给 .lift（同一时刻只有一张）。 */
-  box-shadow:0 0 6px rgba(94,240,255,.10);
-  -webkit-clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
-  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
-  /* ★ 刻意不用 backdrop-filter：30 张卡片各做一次全屏背景模糊太贵（实测吃掉 15fps）。
-     改用半透明+渐变模拟面板质感，肉眼几乎无差别。 */
-  opacity:0;transform:translateY(24px);
-  animation:cardIn .68s cubic-bezier(.16,1,.3,1) forwards;
-  -webkit-animation:cardIn .68s cubic-bezier(.16,1,.3,1) forwards;
-  transition:transform .15s ease,border-color .2s ease,background .2s ease;
-  -webkit-transition:transform .15s ease,border-color .2s ease,background .2s ease;
-}
-@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
-.card:active{transform:scale(.97)}
-
-/* 全息底座：卡片下方悬浮的投影网格 */
-.card .base{
-  position:absolute;left:8%;right:8%;bottom:-9px;height:26px;pointer-events:none;
-  opacity:0;transition:opacity .25s;-webkit-transition:opacity .25s;
-  background-image:
-    linear-gradient(rgba(94,240,255,.5) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(94,240,255,.35) 1px,transparent 1px);
-  background-size:100% 7px,7px 100%;
-  -webkit-mask-image:linear-gradient(to bottom,#000,transparent);
-  mask-image:linear-gradient(to bottom,#000,transparent);
-}
-/* 悬浮时：抬起 + 底座显现 + 品红描边 */
-.card.lift{
-  transform:translateY(-5px);
-  border-color:rgba(255,45,110,.55);
-  box-shadow:0 0 0 1px rgba(255,45,110,.22), 0 10px 30px rgba(255,45,110,.20),
-             inset 0 0 26px rgba(255,45,110,.07);
-}
-.card.lift .base{opacity:.75}
-.card.lift .cdec{opacity:.6}
-
-/* 卡片封面：图片统一放 photos/ 文件夹，命名 p1.jpg 对应 p1.html。
-   （images/ 也认，方便旧布局迁移。）
-   没有图片时显示占位纹理，不会破版。 */
-.cImg{
-  /* 默认不占位：只有确认图片存在才显示，避免"先出框再消失"的跳动 */
-  display:none;position:relative;height:84px;margin:0 0 10px;
-  overflow:hidden;border-radius:2px;
-  background:linear-gradient(158deg,rgba(94,240,255,.11),rgba(255,45,110,.07) 60%,rgba(94,240,255,.04));
-  border:1px solid rgba(94,240,255,.14);
-}
-.cImg img{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  object-fit:cover;display:block;opacity:0;
-  -webkit-transition:opacity .4s;transition:opacity .4s;
-}
-.cImg.on{display:block}
-.cImg.on img{opacity:.9}
-.cImg:after{
-  content:"";position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;
-  background:repeating-linear-gradient(180deg,rgba(94,240,255,.055) 0 1px,transparent 1px 3px);
-}
-
-/* 左侧能量条 */
-.card .bar{
-  position:absolute;left:6px;top:12px;bottom:12px;width:2px;
-  background:rgba(94,240,255,.10);overflow:hidden;
-}
-.card .bar i{
-  position:absolute;left:0;bottom:0;width:2px;height:0;
-  background:linear-gradient(0deg,#ff2d6e,#8fa8ff 55%,#5ef0ff);
-  box-shadow:0 0 6px rgba(94,240,255,.8);
-}
-.card.act .bar i{animation:barFill 1.1s cubic-bezier(.16,1,.3,1) forwards;
-  -webkit-animation:barFill 1.1s cubic-bezier(.16,1,.3,1) forwards}
-@keyframes barFill{from{height:0}to{height:100%}}
-
-/* 四角 L 形装饰 */
-.cdec{
-  position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;
-  background:
-    linear-gradient(#5ef0ff,#5ef0ff) left top/11px 1px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) left top/1px 11px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) right top/11px 1px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) right top/1px 11px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) left bottom/11px 1px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) left bottom/1px 11px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) right bottom/11px 1px no-repeat,
-    linear-gradient(#5ef0ff,#5ef0ff) right bottom/1px 11px no-repeat;
-  opacity:.42;
-}
-/* 扫光 */
-.card .sweep{
-  position:absolute;top:0;left:-60%;width:45%;height:100%;pointer-events:none;
-  background:linear-gradient(100deg,transparent,rgba(94,240,255,.14),transparent);
-  transition:left .6s ease;-webkit-transition:left .6s ease;
-}
-.card.act .sweep{left:125%}
-/* 点击脉冲 */
-.card.go{animation:cardGo .42s ease-out;-webkit-animation:cardGo .42s ease-out}
-@keyframes cardGo{
-  0%{box-shadow:0 0 0 0 rgba(94,240,255,.55);border-color:rgba(94,240,255,.9)}
-  100%{box-shadow:0 0 0 16px rgba(94,240,255,0);border-color:rgba(94,240,255,.16)}
-}
-.cRow{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:8px}
-.cNo{font-size:9px;letter-spacing:2px;color:#4d8fb5;
-  font-family:ui-monospace,Menlo,Consolas,monospace}
-.cHex{font-size:8px;letter-spacing:1px;color:#c9557f;
-  font-family:ui-monospace,Menlo,Consolas,monospace}
-.cNm{font-size:16.5px;font-weight:800;color:#e6f2ff;margin-bottom:6px;line-height:1.35}
-.cDs{font-size:11px;color:#6b8bab;line-height:1.6;min-height:15px;
-  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
-  -webkit-line-clamp:2;-webkit-box-orient:vertical}
-.cGo{margin-top:12px;font-size:9px;letter-spacing:2.2px;color:#ff2d6e;
-  font-family:ui-monospace,Menlo,Consolas,monospace;opacity:.95;
-  text-shadow:0 0 8px rgba(255,45,110,.5)}
-@media (min-width:1025px){.card{width:calc(33.333% - 10px);margin:0 5px 15px}}
-@media (max-width:600px){.card{width:100%;margin:0 0 11px}}
-
-/* 空态 */
-#empty{
-  text-align:center;padding:46px 20px;font-size:12px;color:#5a86ad;line-height:2.1;
-  letter-spacing:1.2px;border:1px dashed rgba(94,240,255,.20);border-radius:4px;
-  margin:0 auto;max-width:420px}
-#empty b{color:#5ef0ff;font-weight:700}
-
-/* ══════════ 音乐 ══════════ */
-#music{
-  position:fixed;z-index:8;right:13px;
-  top:calc(env(safe-area-inset-top,0px) + 62px);
-  display:flex;flex-direction:column;align-items:center;gap:8px}
-.mbtn{
-  width:44px;height:44px;border-radius:3px;cursor:pointer;position:relative;
-  background:rgba(8,14,28,.76);border:1px solid rgba(94,240,255,.28);
-  display:flex;align-items:center;justify-content:center;
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  color:#8fd4ee;font-size:16px}
-.mbtn.sm{width:36px;height:36px;font-size:12px}
-.mbtn:active{transform:scale(.92)}
-.mbtn.off{opacity:.4}
-#mMain.playing:before{
-  content:"";position:absolute;top:-3px;right:-3px;bottom:-3px;left:-3px;
-  border:1px solid rgba(94,240,255,.5);border-radius:3px;
-  animation:pulse 2s ease-out infinite;
-  -webkit-animation:pulse 2s ease-out infinite}
-@keyframes pulse{0%{transform:scale(.92);opacity:.9}100%{transform:scale(1.32);opacity:0}}
-/* 播放器信息区：曲名 + 时间 + 可拖进度条 */
-#mName{
-  position:fixed;z-index:8;right:66px;
-  top:calc(env(safe-area-inset-top,0px) + 74px);
-  width:150px;text-align:right;
-  font-family:ui-monospace,Menlo,Consolas,monospace;
-  opacity:0;transition:opacity .3s;-webkit-transition:opacity .3s;
-  pointer-events:none}
-#mName.on{opacity:1;pointer-events:auto}
-#mT{
-  font-size:10px;letter-spacing:1.1px;color:#8fd4ee;line-height:1.5;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#mTime{font-size:8.5px;letter-spacing:1px;color:#4a7290;line-height:1.5;margin-top:1px}
-#mBar{
-  height:3px;margin-top:6px;border-radius:2px;cursor:pointer;
-  background:rgba(94,240,255,.14);position:relative;overflow:hidden}
-#mBar i{
-  position:absolute;left:0;top:0;bottom:0;width:0%;display:block;
-  background:linear-gradient(90deg,#5ef0ff,#c07cff)}
-#mBar:after{                 /* 加大触摸命中区，手机上好拖 */
-  content:"";position:absolute;left:0;right:0;top:-9px;bottom:-9px}
-
-/* 播放列表面板 */
-#mPanel{
-  position:fixed;z-index:9;right:66px;
-  top:calc(env(safe-area-inset-top,0px) + 128px);
-  width:150px;max-height:52vh;overflow-y:auto;
-  background:rgba(6,11,24,.94);border:1px solid rgba(94,240,255,.24);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  padding:6px;display:none}
-#mPanel.on{display:block}
-#mPanelT{
-  font-size:8.5px;letter-spacing:2px;color:#4a7290;padding:2px 4px 6px;
-  font-family:ui-monospace,Menlo,Consolas,monospace}
-.trk{
-  display:block;width:100%;text-align:left;cursor:pointer;
-  padding:6px 7px;font-size:10px;color:#7fa8c4;letter-spacing:.6px;
-  border-left:2px solid transparent;background:none;border-top:0;border-right:0;border-bottom:0;
-  font-family:ui-monospace,Menlo,Consolas,monospace;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mbtn.on{background:rgba(94,240,255,.14);border-color:rgba(94,240,255,.6);color:#5ef0ff}
-.trk.cur{color:#5ef0ff;border-left-color:#5ef0ff;background:rgba(94,240,255,.08)}
-.trk i{font-style:normal;opacity:.5;margin-right:5px}
-
-/* ══════════ 返回顶部 ══════════ */
-#top{
-  position:fixed;z-index:8;left:13px;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);
-  width:38px;height:38px;border-radius:3px;cursor:pointer;
-  background:rgba(8,14,28,.80);border:1px solid rgba(94,240,255,.26);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  color:#8fd4ee;font-size:15px;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;
-  transition:opacity .28s;-webkit-transition:opacity .28s}
-#top.on{opacity:1;pointer-events:auto}
-#top:active{transform:scale(.9)}
-
-/* ══════════ 预览 ══════════ */
-#pv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:20;background:#02050c;display:none}
-#pv.on{display:block}
-#pvF{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
-#pvBar{
-  position:absolute;top:0;left:0;right:0;z-index:22;height:44px;
-  padding:calc(env(safe-area-inset-top,0px)) 12px 0;
-  display:flex;align-items:center;gap:10px;
-  background:rgba(2,5,12,.92);border-bottom:1px solid rgba(94,240,255,.15)}
-.pvbtn{
-  width:32px;height:32px;border-radius:3px;cursor:pointer;flex:0 0 auto;
-  background:rgba(255,255,255,.06);border:1px solid rgba(94,240,255,.24);
-  color:#cfe3f5;font-size:16px;display:flex;align-items:center;justify-content:center}
-.pvbtn:active{transform:scale(.9)}
-#pvT{font-size:12.5px;font-weight:700;color:#cfe3f5;flex:1;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#pvL{
-  position:absolute;top:50%;left:50%;margin:-15px 0 0 -15px;z-index:21;
-  width:30px;height:30px;border:2px solid rgba(94,240,255,.20);
-  border-top-color:#5ef0ff;border-radius:50%;
-  animation:spin .8s linear infinite;-webkit-animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ══════════ 跃迁闪光 ══════════ */
-#warp{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:30;pointer-events:none;opacity:0;
-  background:radial-gradient(circle at 50% 50%,rgba(190,250,255,.88),rgba(94,200,255,.22) 42%,transparent 70%)}
-#warp.go{animation:warpFlash .52s ease-out;-webkit-animation:warpFlash .52s ease-out}
-@keyframes warpFlash{0%{opacity:0}16%{opacity:1}100%{opacity:0}}
-/* 跃迁时的环形冲击波 */
-#shock{
-  position:fixed;top:50%;left:50%;z-index:29;width:20px;height:20px;margin:-10px 0 0 -10px;
-  border-radius:50%;pointer-events:none;opacity:0;
-  border:2px solid rgba(94,240,255,.9)}
-#shock.go{animation:shockGo .6s ease-out;-webkit-animation:shockGo .6s ease-out}
-@keyframes shockGo{
-  0%{opacity:.9;transform:scale(1)}
-  100%{opacity:0;transform:scale(26)}
-}
-
-/* ══════════ 数据撕裂转场 ══════════ */
-#tear{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:31;
-  pointer-events:none;display:none;overflow:hidden;
-}
-#tear.on{display:block}
-#tear i{
-  position:absolute;left:-10%;right:-10%;display:block;
-  background:linear-gradient(90deg,transparent,rgba(94,240,255,.30),rgba(255,45,110,.22),transparent);
-  -webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);
-}
-#tear i.go{
-  animation:tearGo .46s cubic-bezier(.2,.8,.3,1) forwards;
-  -webkit-animation:tearGo .46s cubic-bezier(.2,.8,.3,1) forwards;
-}
-@keyframes tearGo{
-  0%{opacity:0;-webkit-transform:translate3d(0,0,0) scaleY(1);transform:translate3d(0,0,0) scaleY(1)}
-  22%{opacity:1}
-  100%{opacity:0;-webkit-transform:translate3d(var(--dx),0,0) scaleY(.28);
-       transform:translate3d(var(--dx),0,0) scaleY(.28)}
-}
-
-/* 预览打开时冻结主页面全部 CSS 动画。
-   不这么做的话，背景星云/网格/扫描线在子页面盖住的情况下仍在跑，
-   白白吃 GPU 和电量 —— 手机上尤其明显。 */
-body.pvfreeze #neb,
-body.pvfreeze #grid,
-body.pvfreeze #scan,
-body.pvfreeze #scan2,
-body.pvfreeze #crtBeam,
-body.pvfreeze #tickIn,
-body.pvfreeze #ttl,
-body.pvfreeze .mbtn,
-body.pvfreeze #top,
-body.pvfreeze #mPanel,
-body.pvfreeze #mName,
-body.pvfreeze .card.act .bar i{
-  animation-play-state:paused !important;
-  -webkit-animation-play-state:paused !important;
-}
-
-/* ══════════ 错误兜底 ══════════ */
-#err{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;
-  background:rgba(120,20,30,.94);color:#ffd8d8;font-size:10.5px;
-  padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 10px);
-  line-height:1.6;font-family:ui-monospace,Menlo,Consolas,monospace}
-#err.on{display:block}
-
-/* ══════════ 响应式字号（必须放在最后：同特异性下后者胜）══════════ */
-@media (max-height:640px){
-  #ttl{font-size:33px;letter-spacing:10px;padding-left:10px}
-  #sub{margin-top:10px;font-size:13.5px;letter-spacing:3.2px;padding-left:3.2px}
-  #sub:after{margin-top:5px}
-  #line{margin:10px auto 0}
-  #greet{margin-top:8px}
-  #greetDate{font-size:12px}
-  #greetMsg{margin-top:3px;font-size:9px}
-  #quote{margin:9px auto 0;font-size:12.5px;line-height:1.75}
-  .cNm{font-size:15px}
-  #head{padding-top:8px}
-}
-
-/* ★ 宽屏放大：大屏空间富余，标题再上一档，层级更舒展 */
-@media (min-width:760px){
-  #ttl{font-size:58px;letter-spacing:20px;padding-left:20px}
-  #sub{font-size:18px;letter-spacing:6px;padding-left:6px}
-  #quote{font-size:15px;max-width:380px}
-  #greetDate{font-size:14px}
-  #greetMsg{font-size:10.5px}
-  .cNm{font-size:17.5px}
-}
 </style>
 </head>
 <body>
 
-<div id="bg"></div>
-<div id="neb"></div>
-<div id="bgTech"></div><div id="bgHor"></div>
-<canvas id="fx"></canvas>
-<div id="grid"></div>
-<div id="gridFade"></div>
-<div id="scan"></div>
-<div id="scan2"></div>
-<div id="crt"></div>
-<div id="crtBeam"></div>
+<div id="shower"></div>
 
-<div class="cn" id="cnTL"><i class="h"></i><i class="v"></i></div>
-<div class="cn" id="cnTR"><i class="h"></i><i class="v"></i></div>
-<div class="cn" id="cnBL"><i class="h"></i><i class="v"></i></div>
-<div class="cn" id="cnBR"><i class="h"></i><i class="v"></i></div>
-<div id="ruler"></div>
+<div class="wrap">
+  <header>
+    <div class="logo">💝</div>
+    <h1>CMY和LYX的专属浪漫网页</h1>
+    <div class="sub">每一份小心意，都收在这里</div>
+    <div class="greet" id="greet"><span class="dot"></span><span>今天也想你</span></div>
+    <div class="count" id="count">正在扫描…</div>
+  </header>
 
-<div id="hud">
-  <div class="hudL"><div class="dot"></div><div class="hudT">NEXUS <b>ONLINE</b></div></div>
-  <div class="hudR">
-    <div id="sig"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
-    <div class="hudT" id="clock">--:--</div>
+  <div class="bar">
+    <div class="search"><span>🔍</span><input id="q" placeholder="找一找…"></div>
+    <button class="btn primary" id="addBtn">＋ 添加</button>
+    <button class="btn ghost" id="toolBtn" title="管理">⚙</button>
   </div>
-</div>
 
-<div id="wrap">
-  <div id="head">
-    <div id="ttlWrap">
-      <div id="ttl"><span>N</span><span>E</span><span>X</span><span>U</span><span>S</span></div>
+  <!-- 管理区：默认收起。注意 #rescan / #diagBtn 必须保留在 DOM 里（JS 依赖），
+       这里只是用 CSS 隐藏，功能完全不受影响 -->
+  <div class="tools" id="tools">
+    <button class="btn" id="rescan">重新扫描</button>
+    <button class="btn" id="diagBtn">自检</button>
+    <div class="tnote">
+      网页名取每个文件里的 &lt;title&gt;，标题里第一个表情会自动变成图标，
+      所以换设备打开名字也一样。新页面改名 p1.html、p2.html… 上传即出现。
+      <br><b>更新了页面却还是老样子？</b>刷新一次本页即可（列表页每次刷新都会取最新版）；
+      若是刚上传的<b>新文件</b>，点上面的「重新扫描」。
+      <span id="verTag" style="opacity:.55"></span>
     </div>
-    <div id="sub" data-t="欢迎来到 CMY 的领域"></div>
-    <div id="line"></div>
-    <div id="greet"><div id="greetDate"></div><div id="greetMsg"></div></div>
-    <div id="quote"></div>
   </div>
-  <div id="stat">SCANNING…</div>
-  <div id="cards"></div>
-  <div id="empty" style="display:none"></div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="empty" id="empty" style="display:none">
+    <div class="big">🌙</div>
+    <div>这里还空着<br>把做好的网页传上来，它就会出现在下面</div>
+  </div>
+
+  <div class="diag" id="diag"></div>
+
+  <div class="tips">
+    <span class="tl">慢慢看，不着急</span>
+    点亮一个卡片，就是打开一份心意　·　右上角 🎵 可以换歌
+  </div>
+
+  <footer>
+    <span class="fl">愿这里的每一个页面，都能让你笑一下</span>
+    <span class="fh">打开后按手机返回键即可回到这里，音乐不会停</span>
+  </footer>
 </div>
 
-<div id="tick"><div id="tickIn"></div></div>
-
-<div id="music">
-  <div class="mbtn sm off" id="mPrev">◀</div>
-  <div class="mbtn" id="mMain">▶</div>
-  <div class="mbtn sm off" id="mNext">»</div>
-  <div class="mbtn sm off" id="mList">≡</div>
-  <div class="mbtn sm" id="mSfx">◈</div>
+<button id="music" title="背景音乐">🎵</button>
+<div id="mpanel">
+  <h4>🎶 背景音乐</h4>
+  <div id="mnow">—</div>
+  <div id="mlist"></div>
+  <div class="sep"></div>
+  <div class="mnav">
+    <button class="mbtn" id="mPrev" title="上一首">⏮</button>
+    <button class="mbtn" id="mNext" title="下一首">⏭</button>
+    <span class="mseq" id="mseq">顺序播放</span>
+  </div>
+  <div class="sep"></div>
+  <label>换一首自己的歌</label>
+  <input type="file" id="mfile" accept="audio/*">
+  <div class="sep"></div>
+  <label>音量</label>
+  <input type="range" class="vol" id="mvol" min="0" max="100" value="55">
+  <button class="pbtn" id="mtoggle">▶ 播放</button>
+  <div class="hint">服务器音乐文件同名即可自动识别，所有设备都能听到。选本地文件只在本机有效。</div>
 </div>
-<div id="mName">
-  <div id="mT"></div>
-  <div id="mTime">00:00 / 00:00</div>
-  <div id="mBar"><i></i></div>
-</div>
-<div id="mPanel">
-  <div id="mPanelT">TRACK LIST</div>
-  <div id="mPanelL"></div>
+
+<!-- 注意：这里不能加 loop。加了 loop 后 ended 事件永远不触发，
+     就没法"一首播完自动接下一首"了。顺序播放由 JS 的 ended 事件驱动。 -->
+<audio id="audio" preload="auto" playsinline webkit-playsinline x5-playsinline></audio>
+
+<!-- 只有自动播放被浏览器拦截时才会出现；能自动播就永远看不到它 -->
+<div id="mstart">
+  <span class="mi">🎵</span><span class="mt">开启音乐</span>
 </div>
 
-<div id="top">↑</div>
-
+<!-- 全屏预览：用 iframe 打开子页面，当前页不卸载 → 音乐不会断 -->
 <div id="pv">
-  <div id="pvL" style="display:none"></div>
-  <div id="pvBar">
-    <div class="pvbtn" id="pvBack">←</div>
-    <div id="pvT">预览</div>
+  <div class="pvtop">
+    <b id="pvT"></b>
+    <button class="btn" id="pvMusic" title="音乐">🎵</button>
+    <button class="btn" id="pvNew">新窗口</button>
+    <button class="btn" id="pvClose">关闭</button>
   </div>
-  <iframe id="pvF"></iframe>
+  <iframe id="pvF" allow="autoplay"></iframe>
 </div>
 
-<div id="tear"></div>
-<div id="shock"></div>
-<div id="warp"></div>
-<div id="err"></div>
+<div class="mask" id="mask">
+  <div class="modal">
+    <h2 id="m_title">编辑页面</h2>
+    <input type="hidden" id="m_key">
+    <div class="fld"><label>显示的名字</label><input id="m_t" placeholder="比如：跳动的心"></div>
+    <div class="fld"><label>文件名</label><input id="m_f" placeholder="p1.html" disabled></div>
+    <div class="fld"><label>一句话说明</label><input id="m_d" placeholder="选填"></div>
+    <div class="fld"><label>图标</label><div class="emojis" id="m_e"></div></div>
+    <div class="note">这里改的只存在本机浏览器。<br>想让所有设备都一样，改那个网页里的 &lt;title&gt;。</div>
+    <div class="row">
+      <button class="btn" id="m_cancel">取消</button>
+      <button class="btn primary" id="m_ok">保存</button>
+    </div>
+  </div>
+</div>
 
 <script>
-(function(){
-"use strict";
+/* ══════════════════════════════════════════════════════════════
+   固定登记的页面（不扫描，一定显示）
+   ══════════════════════════════════════════════════════════════ */
+var FIXED = [
+  { f:"heart.html", d:"爱心弹窗动画，可拖拽、点击炸开" },
+  /* ★ 好记的文件名也一并识别（本轮修复）★
+     之前列表页只扫 p1~p30，如果你把魔方相册传成 cube.html、
+     银河传成 galaxy.html、孔明灯传成 lamp.html，它们是【不会出现在列表里】的 ——
+     你点开的其实还是服务器上原来的 p1.html / p2.html（旧版），
+     所以"明明覆盖了却还是老效果"。
+     现在两套命名都认：你用哪个名字上传，列表页就显示哪个。 */
+  { f:"cube.html",   d:"魔方相册，六面照片，可拖动旋转、任意位置缩放" },
+  { f:"galaxy.html", d:"照片银河，螺旋星系，点击星星看照片" },
+  { f:"lamp.html",   d:"许愿的灯，孔明灯载着照片升空" }
+];
 
-function showErr(msg){
-  var e=document.getElementById("err");
-  if(!e) return;
-  e.textContent="ERROR: "+msg;
-  e.className="on";
-}
-window.onerror=function(msg,src,ln){ showErr(String(msg)+" @line "+ln); };
+/* 自动槽位：p1.html ~ p30.html，存在哪个就显示哪个 */
+var SLOTS = [];
+for (var i = 1; i <= 30; i++) SLOTS.push("p" + i + ".html");
 
-var MAXP=30;
-var V=Date.now().toString(36);
-var cardsEl=document.getElementById("cards");
-var emptyEl=document.getElementById("empty");
-var statEl=document.getElementById("stat");
+/* 服务器音乐：把 mp3 传到本目录，改名为下面任意一个即可自动识别 */
+/* ══════ 服务器音乐 ══════
+   把歌传到本目录，按顺序命名：song1.mp3、song2.mp3、song3.mp3 …
+   会自动识别并按 1→2→3 的顺序一首接一首播放，播完最后一首回到第一首。
 
-/* ══════════ Canvas 特效 ══════════ */
-var cvs=document.getElementById("fx");
-var cx=null;
-try{ cx=cvs.getContext("2d"); }catch(e){}
-var W=0,H=0,DPR=1;
-var COVERS=true;                       /* 卡片封面图开关 */
-var COVER_DIR="";                      /* 封面图目录：优先 photos/，其次 images/ */
-var COVER_EXT="jpg";
-var COVER_EXTS=["jpg","png","jpeg","webp"];
-var stars=[],dust=[],links=[],meteor=null,mTimer=0;
-var gal=null,galAng=0;
-var ripples=[],sparks=[],rings=[];
-var paused=false,holoAng=0,radarAng=0,radarGrad=null,radarR=0;
-
-function measure(){
-  DPR=Math.min(window.devicePixelRatio||1,2);
-  W=window.innerWidth; H=window.innerHeight;
-  cvs.style.width=W+"px"; cvs.style.height=H+"px";
-  cvs.width=Math.round(W*DPR); cvs.height=Math.round(H*DPR);
-  if(cx) cx.setTransform(DPR,0,0,DPR,0,0);
-  buildSky();
-  buildRadar();
-  buildGalaxy();
-}
-
-/* ★ 连线对"预计算"：
-   星星位置固定（只有亮度在闪），所以谁跟谁近是恒定的。
-   只在 buildSky 时算一次并存起来，每帧只负责画。
-   如果每帧 O(n²) 两两比对，200 颗星就是 4 万次，会掉帧。 */
-function buildLinks(){
-  links=[];
-  if(!cx||stars.length<2) return;
-  var MAXD=Math.min(110, Math.min(W,H)*0.22);
-  var MAXL=130;                       /* 连线总数上限，再多会糊成一团 */
-  var cell=MAXD, map={}, i, j, a, b, dx, dy, d, key, gx, gy, k, list;
-  for(i=0;!DBG.noStar&&i<stars.length;i++){
-    gx=Math.floor(stars[i].x/cell);
-    gy=Math.floor(stars[i].y/cell);
-    key=gx+"_"+gy;
-    if(!map[key]) map[key]=[];
-    map[key].push(i);
+   每个槽位里列出同一个序号的可能后缀，逐个探测，
+   命中一个就进入下一号。连续 2 个序号都找不到就停止（省请求）。
+   没有 song* 时，还会退回找 bgm.mp3 / music.mp3（兼容旧命名）。 */
+var MUSIC_SLOTS = (function(){
+  var SUF=["mp3","m4a","ogg","wav"], slots=[];
+  for(var i=1;i<=12;i++){
+    var one=[];
+    SUF.forEach(function(s){ one.push("song"+i+"."+s); });
+    slots.push(one);
   }
-  for(i=0;i<stars.length;i++){
-    a=stars[i];
-    gx=Math.floor(a.x/cell); gy=Math.floor(a.y/cell);
-    /* 只查自己格 + 右/下/右下/右上 四格，避免重复 */
-    var nb=[[0,0],[1,0],[0,1],[1,1],[1,-1]];
-    for(k=0;k<nb.length;k++){
-      key=(gx+nb[k][0])+"_"+(gy+nb[k][1]);
-      list=map[key];
-      if(!list) continue;
-      for(j=0;j<list.length;j++){
-        if(list[j]<=i) continue;
-        b=stars[list[j]];
-        dx=a.x-b.x; dy=a.y-b.y;
-        d=Math.sqrt(dx*dx+dy*dy);
-        if(d<MAXD){
-          links.push({a:i,b:list[j],d:d});
-          if(links.length>=MAXL) return;
-        }
+  return slots;
+})();
+/* 旧命名兜底（bgm.mp3 / music.mp3）。
+   ★ 必须单独放：song 序列里"连续 2 个序号为空就停止"，
+     如果把它们塞在 slots 末尾，只有 bgm.mp3 时会在 song1/song2 处就 break，
+     永远轮不到兜底名 —— 旧命名的用户会突然没音乐。 */
+var MUSIC_FALLBACK = [
+  ["bgm.mp3","bgm.m4a","bgm.ogg","bgm.wav"],
+  ["music.mp3","music.m4a","music.ogg","music.wav"]
+];
+var SERVER_MUSIC = MUSIC_SLOTS[0];   // 兼容旧代码里对 SERVER_MUSIC[0] 的引用
+var MUSIC_MAX = 12;                  // 最多收多少首
+
+var EMOJIS = ["❤️","💖","✨","🌸","💕","🌙","⭐","🎀","💗","🦋","🍀","💝","🌈","🎈","🧸","💞"];
+
+var TINT=[
+  "linear-gradient(140deg,rgba(255,159,181,.32),rgba(255,159,181,.10))",
+  "linear-gradient(140deg,rgba(169,216,255,.32),rgba(169,216,255,.10))",
+  "linear-gradient(140deg,rgba(168,230,207,.32),rgba(168,230,207,.10))",
+  "linear-gradient(140deg,rgba(255,224,138,.32),rgba(255,224,138,.10))",
+  "linear-gradient(140deg,rgba(201,167,255,.32),rgba(201,167,255,.10))",
+  "linear-gradient(140deg,rgba(255,205,176,.32),rgba(255,205,176,.10))"
+];
+
+var LOCAL = [];
+try { LOCAL = JSON.parse(localStorage.getItem("mypages") || "[]"); } catch(e){ LOCAL = []; }
+var META = {};
+try { META = JSON.parse(localStorage.getItem("pagemeta") || "{}"); } catch(e){ META = {}; }
+
+var grid=document.getElementById("grid"), emptyEl=document.getElementById("empty"),
+    cnt=document.getElementById("count"), diag=document.getElementById("diag");
+var kw="", FOUND=[];
+
+/* ── 由文件名算出固定的图标（同一文件在任何设备都一样）── */
+function hashOf(s){
+  var h=0;
+  for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0;
+  return h;
+}
+function pickEmoji(f){ return EMOJIS[hashOf(f) % EMOJIS.length]; }
+
+/* ── 抽标题开头的表情 ──
+   ★ 关键：必须用 new RegExp 动态构造，不能写字面量！
+     \p{...} 是 ES2018 语法，老内核（部分微信 X5 / iOS 10）不认识。
+     字面量会在「整个 script 编译期」就报错 —— 那样不是这个功能失效，
+     而是整个页面所有脚本一起死掉（列表扫不出来、音乐没了、按钮全废）。
+     动态构造则只在运行时抛错，可以被 try/catch 兜住，降级为"不用表情"。 */
+var EMOJI_RE=(function(){
+  try{
+    return new RegExp("^(\\p{Extended_Pictographic}|[\\u2600-\\u27BF\\uFE0F])","u");
+  }catch(e){
+    try{
+      // 降级：只认常见的表情区段
+      return new RegExp("^[\\u2600-\\u27BF\\uFE0F\\uD83C-\\uD83E][\\uDC00-\\uDFFF]?|^[\\uD83D][\\uDE00-\\uDEFF]");
+    }catch(_){ return null; }
+  }
+})();
+
+/* ── 读取网页的 title / description，顺便抽出标题里的第一个表情 ── */
+function readMeta(text, f){
+  var out={ t:f.replace(/\.html?$/i,""), d:"", e:pickEmoji(f) };
+  try{
+    var doc=new DOMParser().parseFromString(text,"text/html");
+    var ti=doc.querySelector("title");
+    if(ti && ti.textContent.trim()) out.t=ti.textContent.trim();
+    var md=doc.querySelector('meta[name="description"]');
+    if(md && md.content) out.d=md.content.trim();
+    var me=doc.querySelector('meta[name="emoji"]');
+    if(me && me.content.trim()) out.e=me.content.trim();
+    else{
+      // 标题开头的表情当成图标
+      var m=EMOJI_RE?out.t.match(EMOJI_RE):null;
+      if(m){
+        var em=out.t.slice(0, m[0].length + (out.t[m[0].length]==="\uFE0F"?1:0));
+        out.e=em;
+        out.t=out.t.slice(em.length).trim() || f;
       }
     }
-  }
-}
-function buildSky(){
-  stars=[]; dust=[];
-  if(!cx) return;
-  var n=Math.round(W*H/7200);
-  if(n<60) n=60;
-  if(n>200) n=200;
-  var i;
-  for(i=0;i<n;i++){
-    stars.push({x:Math.random()*W,y:Math.random()*H,
-      r:Math.random()*1.2+0.3,a:Math.random()*0.5+0.25,
-      s:Math.random()*0.9+0.3,p:Math.random()*Math.PI*2});
-  }
-  var dn=46;
-  for(i=0;i<dn;i++){
-    dust.push({x:Math.random()*W,y:Math.random()*H,
-      r:Math.random()*1.6+0.5,a:Math.random()*0.28+0.08,
-      vx:(Math.random()*0.5+0.2)*(Math.random()>0.5?1:-1),
-      vy:-(Math.random()*14+6)});
-  }
-  buildLinks();
-}
-/* 雷达渐变缓存：中心固定、径向渐变与扫描角度无关，
-   没必要每帧新建（大屏上每帧建+大面积填充会把帧率砍半） */
-function buildRadar(){
-  radarGrad=null;
-  if(!cx) return;
-  var cxp=W*0.5, cyp=H*0.46;
-  radarR=Math.max(W,H)*0.58;
-  try{
-    var g=cx.createRadialGradient(cxp,cyp,0,cxp,cyp,radarR);
-    g.addColorStop(0,"rgba(94,240,255,.07)");
-    g.addColorStop(1,"rgba(94,240,255,0)");
-    radarGrad=g;
-  }catch(e){ radarGrad=null; }
-}
-/* ══════ 星系核心 ══════
-   预计算螺旋点位，每帧只做旋转变换。
-   ★ 关键点：给每个点一个 depth（沿倾斜圆盘的 z），
-     远的点更暗更小 —— 这才产生"纵深"，否则只是一盘平面点。 */
-function buildGalaxy(){
-  gal=null;
-  if(!cx) return;
-  var pts=[],ARMS=2,PER=110,i,a,arm;
-  var R=Math.min(W,H)*0.42;
-  if(R<80) R=80;
-  for(arm=0;arm<ARMS;arm++){
-    for(i=0;i<PER;i++){
-      var t=i/PER;
-      /* 螺旋：角度随半径增长；加抖动让臂有厚度 */
-      a=arm*Math.PI + t*3.4 + (Math.random()-0.5)*0.42;
-      var rr=R*(0.14+t*0.86)*(0.82+Math.random()*0.32);
-      if(rr>R) rr=R;
-      pts.push({
-        a:a, r:rr,
-        /* 厚度：越靠外越薄 */
-        h:(Math.random()-0.5)*R*0.09*(1-t*0.6),
-        s:Math.random()*1.15+0.35,
-        b:Math.random()*0.5+0.45,
-        hot:Math.random()<0.24              /* 亮星（品红）点缀 */
-      });
-    }
-  }
-  gal={pts:pts,R:R};
+  }catch(e){}
+  return out;
 }
 
-/* 画星系：倾斜圆盘 + 核心辉光 */
-function drawGalaxy(dt){
-  if(!cx||!gal) return;
-  var cxp=W*0.5, cyp=H*0.46;
-  var R=gal.R, TILT=0.34;               /* 压扁系数 → 倾斜视角 */
-  var i,p,x,z,sx,sy,dep,sz,al;
-  galAng+=dt*0.055;
-  cx.save();
-
-  /* 核心辉光（缓存渐变太麻烦，这里面积小可以接受） */
-  var g=cx.createRadialGradient(cxp,cyp,0,cxp,cyp,R*0.30);
-  g.addColorStop(0,"rgba(255,240,250,.48)");
-  g.addColorStop(0.28,"rgba(255,120,180,.22)");
-  g.addColorStop(0.62,"rgba(120,190,255,.14)");
-  g.addColorStop(1,"rgba(80,120,255,0)");
-  cx.globalAlpha=1;
-  cx.fillStyle=g;
-  cx.beginPath(); cx.arc(cxp,cyp,R*0.30,0,Math.PI*2); cx.fill();
-
-  /* 螺旋点：远的暗小、近的亮大 */
-  for(i=0;i<gal.pts.length;i++){
-    p=gal.pts[i];
-    var aa=p.a+galAng;
-    x=Math.cos(aa)*p.r;
-    z=Math.sin(aa)*p.r;
-    sx=cxp+x;
-    sy=cyp+z*TILT+p.h*0.5;
-    /* depth: -1(远) ~ 1(近) */
-    dep=Math.sin(aa);
-    sz=p.s*(0.55+0.45*(dep*0.5+0.5));
-    al=p.b*(0.30+0.70*(dep*0.5+0.5));
-    if(sx<-20||sx>W+20||sy<-20||sy>H+20) continue;
-    cx.globalAlpha=al;
-    /* 亮星用品红点缀，其余冷白 —— 双色调 */
-    cx.fillStyle=p.hot?"#ff8fb8":"#cfe8ff";
-    cx.beginPath(); cx.arc(sx,sy,sz,0,Math.PI*2); cx.fill();
-  }
-  cx.restore();
-  cx.globalAlpha=1;
-}
-function spawnMeteor(){
-  var fl=Math.random()>0.5;
-  meteor={x:fl?-60:W+60,y:Math.random()*H*0.5,
-    vx:(fl?1:-1)*(Math.random()*250+300),
-    vy:Math.random()*120+70,life:1};
+function infoOf(f, fallbackD){
+  var it = AUTO[f] || { t:f.replace(/\.html?$/i,""), d:fallbackD||"", e:pickEmoji(f) };
+  var m = META[f] || {};
+  return { f:f, t:m.t||it.t, d:m.d!==undefined?m.d:it.d, e:m.e||it.e };
 }
 
-/* 点击特效：涟漪 + 粒子 + 六边形能量环 */
-var hexR=null;
-function burst(x,y){
-  if(ripples.length>14) ripples.shift();
-  ripples.push({x:x,y:y,t:0,max:0.62});
-  if(rings.length>8) rings.shift();
-  rings.push({x:x,y:y,t:0,max:0.7});
-  var i,a,sp;
-  /* 先削最老的，保证新点击永远有反馈；总量封顶防内存增长 */
-  if(sparks.length>224) sparks.splice(0,sparks.length-200);
-  for(i=0;i<16;i++){
-    a=Math.random()*Math.PI*2;
-    sp=70+Math.random()*190;
-    sparks.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
-      life:1,r:Math.random()*1.8+0.8});
-  }
-}
-function hexPath(x,y,r){
-  cx.beginPath();
-  var i,a;
-  for(i=0;i<6;i++){
-    a=i*Math.PI/3-Math.PI/2;
-    if(i===0) cx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);
-    else cx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);
-  }
-  cx.closePath();
-}
+var AUTO={};
 
-/* 中心全息环 + 雷达扇形 */
-function drawHolo(dt){
-  if(!cx) return;
-  var cxp=W*0.5, cyp=H*0.46;
-  var R=Math.min(W,H)*0.34;
-  var i,a,r1,r2;
-  holoAng+=dt*0.06;
-  radarAng+=dt*0.55;
+function draw(){
+  grid.innerHTML="";
+  var all=FOUND.slice();
+  LOCAL.forEach(function(p){ if(all.indexOf(p.f)<0) all.push(p.f); });
 
-  cx.save();
-  cx.globalAlpha=0.10;
-  cx.strokeStyle="#5ef0ff";
-  cx.lineWidth=1;
-  /* 三道同心圆 */
-  for(i=1;i<=3;i++){
-    cx.beginPath();
-    cx.arc(cxp,cyp,R*i*0.42,0,Math.PI*2);
-    cx.stroke();
-  }
-  /* 外圈刻度：随 holoAng 慢转。
-     ★ 按长短分两批各合成一条 path，48 次 stroke → 2 次 */
-  cx.globalAlpha=0.14;
-  cx.beginPath();
-  cx.arc(cxp,cyp,R*1.32,0,Math.PI*2);
-  cx.stroke();
-  var batch,bb;
-  for(bb=0;bb<2;bb++){
-    batch=(bb===0);                 /* 先画长刻度，再画短刻度 */
-    cx.globalAlpha=batch?0.26:0.12;
-    cx.beginPath();
-    for(i=0;i<48;i++){
-      if((i%6===0)!==batch) continue;
-      a=holoAng+i*Math.PI/24;
-      r1=R*(batch?1.26:1.30); r2=R*1.36;
-      cx.moveTo(cxp+Math.cos(a)*r1,cyp+Math.sin(a)*r1);
-      cx.lineTo(cxp+Math.cos(a)*r2,cyp+Math.sin(a)*r2);
-    }
-    cx.stroke();
-  }
-  /* 内圈虚线段：24 段合成一条 path，1 次 stroke */
-  cx.globalAlpha=0.10;
-  cx.beginPath();
-  for(i=0;i<24;i++){
-    a=-holoAng*1.6+i*Math.PI/12;
-    cx.moveTo(cxp+Math.cos(a)*R*0.98,cyp+Math.sin(a)*R*0.98);
-    cx.arc(cxp,cyp,R*0.98,a,a+0.10);
-  }
-  cx.stroke();
-
-  /* 雷达扇形：用缓存的渐变，避免每帧新建 + 缩小半径降低填充面积 */
-  if(radarGrad&&!DBG.noRadar){
-    cx.globalAlpha=1;
-    cx.fillStyle=radarGrad;
-    cx.beginPath();
-    cx.moveTo(cxp,cyp);
-    cx.arc(cxp,cyp,radarR,radarAng,radarAng+0.34);
-    cx.closePath();
-    cx.fill();
-    /* 扫描前沿那条线 */
-    cx.globalAlpha=0.20;
-    cx.strokeStyle="#9df3ff";
-    cx.lineWidth=1;
-    cx.beginPath();
-    cx.moveTo(cxp,cyp);
-    cx.lineTo(cxp+Math.cos(radarAng+0.34)*radarR, cyp+Math.sin(radarAng+0.34)*radarR);
-    cx.stroke();
-  }
-  cx.restore();
-  cx.globalAlpha=1;
-}
-
-var DBG={noLink:false,noDust:false,noStar:false,noGal:false,noRadar:false,noHolo:false};
-function drawFx(dt){
-  if(!cx||paused) return;
-  var i,o;
-  cx.clearRect(0,0,W,H);
-
-  if(!DBG.noGal) drawGalaxy(dt);
-  if(!DBG.noHolo) drawHolo(dt);
-
-  /* 星座连线 */
-  cx.strokeStyle="#5ef0ff";
-  cx.lineWidth=0.6;
-  for(i=0;!DBG.noLink&&i<links.length;i++){
-    o=links[i];
-    var A=stars[o.a], B=stars[o.b];
-    var tw=(0.6+0.4*Math.sin(A.p))*0.5+(0.6+0.4*Math.sin(B.p))*0.5;
-    cx.globalAlpha=Math.max(0,(1-o.d/130))*0.20*tw;
-    cx.beginPath();
-    cx.moveTo(A.x,A.y); cx.lineTo(B.x,B.y); cx.stroke();
-  }
-
-  /* 星尘 */
-  cx.fillStyle="#8fd4ee";
-  for(i=0;!DBG.noDust&&i<dust.length;i++){
-    o=dust[i];
-    o.x+=o.vx; o.y+=o.vy*dt;
-    if(o.y<-10){ o.y=H+10; o.x=Math.random()*W; }
-    if(o.x<-10) o.x=W+10;
-    if(o.x>W+10) o.x=-10;
-    cx.globalAlpha=o.a;
-    cx.fillRect(o.x,o.y,o.r,o.r);
-  }
-
-  /* 星星 */
-  for(i=0;i<stars.length;i++){
-    o=stars[i];
-    o.p+=dt*o.s;
-    cx.globalAlpha=o.a*(0.6+0.4*Math.sin(o.p));
-    cx.fillStyle="#d8ecff";
-    cx.beginPath(); cx.arc(o.x,o.y,o.r,0,Math.PI*2); cx.fill();
-  }
-
-  /* 流星 */
-  mTimer-=dt;
-  if(mTimer<=0&&!meteor){ spawnMeteor(); mTimer=Math.random()*8+4; }
-  if(meteor){
-    meteor.x+=meteor.vx*dt; meteor.y+=meteor.vy*dt; meteor.life-=dt*0.42;
-    var g2=cx.createLinearGradient(meteor.x,meteor.y,
-      meteor.x-meteor.vx*0.14,meteor.y-meteor.vy*0.14);
-    g2.addColorStop(0,"rgba(220,248,255,.92)");
-    g2.addColorStop(1,"rgba(220,248,255,0)");
-    cx.globalAlpha=1; cx.strokeStyle=g2; cx.lineWidth=2; cx.lineCap="round";
-    cx.beginPath(); cx.moveTo(meteor.x,meteor.y);
-    cx.lineTo(meteor.x-meteor.vx*0.14,meteor.y-meteor.vy*0.14); cx.stroke();
-    if(meteor.life<=0||meteor.x<-140||meteor.x>W+140||meteor.y>H+60) meteor=null;
-  }
-
-  /* 涟漪 */
-  for(i=ripples.length-1;i>=0;i--){
-    o=ripples[i]; o.t+=dt;
-    var k=o.t/o.max;
-    if(k>=1){ ripples.splice(i,1); continue; }
-    cx.globalAlpha=(1-k)*0.55;
-    cx.strokeStyle="#5ef0ff"; cx.lineWidth=2*(1-k)+0.4;
-    cx.beginPath(); cx.arc(o.x,o.y,8+k*66,0,Math.PI*2); cx.stroke();
-    cx.globalAlpha=(1-k)*0.30;
-    cx.beginPath(); cx.arc(o.x,o.y,4+k*34,0,Math.PI*2); cx.stroke();
-  }
-
-  /* 六边形能量环 */
-  for(i=rings.length-1;i>=0;i--){
-    o=rings[i]; o.t+=dt;
-    var k2=o.t/o.max;
-    if(k2>=1){ rings.splice(i,1); continue; }
-    cx.globalAlpha=(1-k2)*0.7;
-    cx.strokeStyle="#9df3ff"; cx.lineWidth=1.6*(1-k2)+0.3;
-    hexPath(o.x,o.y,10+k2*54);
-    cx.stroke();
-  }
-
-  /* 粒子 */
-  for(i=sparks.length-1;i>=0;i--){
-    o=sparks[i];
-    o.life-=dt*1.7;
-    if(o.life<=0){ sparks.splice(i,1); continue; }
-    o.x+=o.vx*dt; o.y+=o.vy*dt;
-    o.vx*=0.94; o.vy=o.vy*0.94+26*dt;
-    cx.globalAlpha=o.life*0.85;
-    cx.fillStyle="#9df3ff";
-    cx.beginPath(); cx.arc(o.x,o.y,o.r*o.life+0.3,0,Math.PI*2); cx.fill();
-  }
-  cx.globalAlpha=1;
-}
-
-/* 全局点击特效（涟漪 + 粒子 + 六边环）*/
-function onTap(ev){
-  var x,y;
-  if(ev.touches&&ev.touches.length){ x=ev.touches[0].clientX; y=ev.touches[0].clientY; }
-  else if(ev.changedTouches&&ev.changedTouches.length){ x=ev.changedTouches[0].clientX; y=ev.changedTouches[0].clientY; }
-  else { x=ev.clientX; y=ev.clientY; }
-  if(typeof x!=="number"||typeof y!=="number") return;
-  burst(x,y);
-}
-document.addEventListener("touchstart",function(e){ unlockAudio(); onTap(e); },{passive:true});
-document.addEventListener("mousedown",function(e){ unlockAudio(); onTap(e); },true);
-/* ══════════ 扫描页面 ══════════ */
-var found=[];
-function headOK(url,cb){
-  var xhr=null;
-  try{ xhr=new XMLHttpRequest(); }catch(e){ cb(false); return; }
-  var done=false;
-  var timer=setTimeout(function(){
-    if(!done){ done=true; try{xhr.abort();}catch(e){} cb(false); }
-  },5000);
-  try{
-    xhr.open("HEAD",url,true);
-    xhr.onreadystatechange=function(){
-      if(done) return;
-      if(xhr.readyState===4){
-        done=true; clearTimeout(timer);
-        cb(xhr.status>=200&&xhr.status<400);
-      }
-    };
-    xhr.send(null);
-  }catch(e){ done=true; clearTimeout(timer); cb(false); }
-}
-function getMeta(url,cb){
-  var xhr=null;
-  try{ xhr=new XMLHttpRequest(); }catch(e){ cb("",""); return; }
-  var done=false;
-  var timer=setTimeout(function(){
-    if(!done){ done=true; try{xhr.abort();}catch(e){} cb("",""); }
-  },5000);
-  try{
-    xhr.open("GET",url,true);
-    xhr.onreadystatechange=function(){
-      if(done) return;
-      if(xhr.readyState===4){
-        done=true; clearTimeout(timer);
-        var t="",d="";
-        if(xhr.status>=200&&xhr.status<400){
-          try{
-            var txt=xhr.responseText;
-            var m=/<title[^>]*>([\s\S]*?)<\/title>/i.exec(txt);
-            if(m) t=m[1].replace(/\s+/g," ").replace(/^\s+|\s+$/g,"");
-            /* ★ 属性值引号全部可选：<meta name=description content=xxx> 也要识别 */
-            var dm=/<meta[^>]+name=["']?description["']?[^>]*content=["']?([^"'<>]*)/i.exec(txt);
-            if(!dm) dm=/<meta[^>]+content=["']?([^"'<>]*)/i.exec(txt);
-            if(!dm || txt.indexOf("description")<0) dm=null;
-            if(dm) d=dm[1].replace(/\s+/g," ").replace(/^\s+|\s+$/g,"");
-          }catch(e){}
-        }
-        cb(t,d);
-      }
-    };
-    xhr.send(null);
-  }catch(e){ done=true; clearTimeout(timer); cb("",""); }
-}
-function pad3(n){ return n<10?"00"+n:(n<100?"0"+n:""+n); }
-function pad2(n){ return n<10?"0"+n:""+n; }
-function hex4(seed){
-  var h="0123456789ABCDEF",s="",i;
-  var v=(seed*2654435761)%65536;
-  for(i=0;i<4;i++){ s+=h.charAt(v%16); v=Math.floor(v/16); }
-  return s;
-}
-
-var BAR=["▯▯▯▯▯▯","▮▯▯▯▯▯","▮▮▯▯▯▯","▮▮▮▯▯▯","▮▮▮▮▯▯","▮▮▮▮▮▯","▮▮▮▮▮▮"];
-function scan(i){
-  if(i>MAXP){ finishScan(); return; }
-  var base="p"+i+".html";
-  headOK(base+"?_v="+V,function(ok){
-    var k=Math.floor(i/MAXP*6);
-    if(k>6) k=6;
-    statEl.textContent="◈ 扫描节点 "+pad2(i)+"/"+MAXP+" "+BAR[k];
-    if(ok){
-      getMeta(base+"?_v="+V,function(t,d){
-        found.push({n:i,title:t||("节点 "+pad3(i)),desc:d,url:base});
-        scan(i+1);
-      });
-    }else{ scan(i+1); }
-  });
-}
-function esc(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function finishScan(){
-  if(found.length===0){
-    statEl.textContent="NO SIGNAL";
-    emptyEl.style.display="block";
-    emptyEl.innerHTML="未 检 测 到 节 点<br>"+
-      "将 <b>p1.html</b> · <b>p2.html</b> … 置于本目录<br>刷新后自动归档";
-    return;
-  }
-  statEl.textContent="◈ 已归档 "+pad2(found.length)+" 个节点 · 链路正常";
-  sfxDone();
-  detectCover();
-}
-/* 先确认封面图放在哪个文件夹：photos/ 优先，其次 images/。
-   两个都没有 → 不显示封面，卡片照常（不会留空框）。 */
-function detectCover(){
-  if(!COVERS||found.length===0){ COVER_DIR=""; render(); return; }
-  var n=found[0].n,dirs=["photos/","images/"],di=0,ei=0;
-  (function next(){
-    if(di>=dirs.length){ COVER_DIR=""; render(); return; }
-    if(ei>=COVER_EXTS.length){ di++; ei=0; next(); return; }
-    headOK(dirs[di]+"p"+n+"."+COVER_EXTS[ei]+"?_v="+V,function(ok){
-      if(ok){ COVER_DIR=dirs[di]; COVER_EXT=COVER_EXTS[ei]; render(); return; }
-      ei++; next();
+  var list=all.map(function(f){ return infoOf(f,""); })
+    .filter(function(p){
+      if(!kw) return true;
+      return (p.t+" "+(p.d||"")+" "+p.f).toLowerCase().indexOf(kw)>-1;
     });
-  })();
-}
-/* 3D 倾斜跟随鼠标。
-   ★ 坑：入场动画 cardIn 是 fill-mode:forwards，
-     动画结束后最终值仍在 CSS 级联中优先级高于 inline style，
-     直接写 transform 无效 —— 必须先 animation:none 解除锁定。 */
-function enableTilt(el){
-  el.style.animation="none";
-  el.style.opacity="1";
-  var raf=null,tx=0,ty=0;
-  function apply(){
-    raf=null;
-    el.style.transform="perspective(620px) rotateX("+tx.toFixed(2)+
-      "deg) rotateY("+ty.toFixed(2)+"deg) translateY(-5px) scale(1.015)";
-  }
-  el.addEventListener("mouseenter",function(){
-    if(el.className.indexOf("go")>=0) return;
-    el.className="card act lift";
+
+  list.forEach(function(p,i){
+    var a=document.createElement("a");
+    a.className="card"; a.href=p.f; a.target="_blank"; a.rel="noopener";
+    a.style.animationDelay=(i*0.035)+"s";
+    a.innerHTML=
+      '<div class="ico" style="background:'+TINT[i%TINT.length]+'"></div>'+
+      '<h3></h3><p></p>'+
+      '<div class="meta"><span class="chip"></span></div>'+
+      '<button class="edit" title="编辑">✎</button>';
+    a.querySelector(".ico").textContent=p.e;
+    a.querySelector("h3").textContent=p.t;
+    a.querySelector("p").textContent=p.d;
+    a.querySelector(".chip").textContent=p.f;
+    a.addEventListener("pointermove",function(e){
+      var r=a.getBoundingClientRect();
+      a.style.setProperty("--mx",((e.clientX-r.left)/r.width*100)+"%");
+      a.style.setProperty("--my",((e.clientY-r.top)/r.height*100)+"%");
+    });
+    a.querySelector(".edit").onclick=function(ev){
+      ev.preventDefault(); ev.stopPropagation(); openModal(p);
+    };
+    // 默认在当前页用 iframe 打开，避免跳转导致音乐中断
+    // （保留 href，鼠标中键/长按仍可走新窗口）
+    a.addEventListener("click",function(ev){
+      if(ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.button!==0) return;
+      ev.preventDefault(); openPv(p);
+    });
+    grid.appendChild(a);
   });
-  el.addEventListener("mousemove",function(e){
-    var r=el.getBoundingClientRect();
-    if(!r.width||!r.height) return;
-    var px=(e.clientX-r.left)/r.width-0.5;
-    var py=(e.clientY-r.top)/r.height-0.5;
-    ty=px*13; tx=-py*13;
-    if(!raf) raf=requestAnimationFrame(apply);
-  });
-  el.addEventListener("mouseleave",function(){
-    el.className="card act";
-    el.style.transform="";
-  });
-}
-/* 只有真正支持 hover 的设备才启用倾斜（手机上无意义且耗性能） */
-var CAN_HOVER=false;
-try{ CAN_HOVER=window.matchMedia&&window.matchMedia("(hover:hover)").matches; }
-catch(e){ CAN_HOVER=false; }
-
-function render(){
-  var html="",i,it;
-  for(i=0;i<found.length;i++){
-    it=found[i];
-    html+='<div class="card" data-i="'+i+'" style="'+
-      '-webkit-animation-delay:'+(0.05*i).toFixed(2)+'s;'+
-      'animation-delay:'+(0.05*i).toFixed(2)+'s">'+
-      '<i class="cdec"></i><i class="sweep"></i><i class="base"></i>'+
-      (COVERS&&COVER_DIR?'<i class="cImg"><img src="'+COVER_DIR+'p'+it.n+'.'+COVER_EXT+
-        '?_v='+V+'" data-n="'+it.n+'" alt=""></i>':'')+
-      '<span class="bar"><i></i></span>'+
-      '<div class="cRow"><span class="cNo">NODE '+pad3(it.n)+'</span>'+
-      '<span class="cHex">#'+hex4(it.n+7)+'</span></div>'+
-      '<div class="cNm">'+esc(it.title)+'</div>'+
-      '<div class="cDs">'+esc(it.desc||"")+'</div>'+
-      '<div class="cGo">ENTER ▸</div>'+
-      '</div>';
-  }
-  cardsEl.innerHTML=html;
-  var list=cardsEl.querySelectorAll(".card");
-  var j;
-  for(j=0;j<list.length;j++){
-    (function(el,k){
-      var d=240+k*75;
-      setTimeout(function(){ el.className="card act"; },d);
-      /* 入场动画(0.68s)跑完再解除锁定并启用倾斜 */
-      if(CAN_HOVER){
-        setTimeout(function(){ try{ enableTilt(el); }catch(e){} }, d+720);
-      }
-    })(list[j],j);
-  }
-  /* 封面：加载成功才显示，失败（没有该图片）就把整块藏起来，不留空框 */
-  var imgs=cardsEl.querySelectorAll(".cImg img"),m;
-  for(m=0;m<imgs.length;m++){
-    (function(im){
-      var tried=0;
-      im.onload=function(){
-        if(im.naturalWidth>0) im.parentNode.className="cImg on";
-        else im.parentNode.style.display="none";
-      };
-      /* 同名不同后缀都试一遍（jpg/png/jpeg/webp），全都没有才把框藏掉 */
-      im.onerror=function(){
-        tried++;
-        /* 最多回退 2 次：绝大多数情况 jpg/png 已够，再多只会拖慢首屏 */
-        if(tried<2&&tried<COVER_EXTS.length&&COVER_DIR){
-          var n=parseInt(im.getAttribute("data-n"),10);
-          im.src=COVER_DIR+"p"+n+"."+COVER_EXTS[tried]+"?_v="+V;
-          return;
-        }
-        im.parentNode.className="cImg";   /* 保持隐藏，不占位 */
-      };
-    })(imgs[m]);
-  }
-  for(j=0;j<list.length;j++){
-    (function(el){
-      el.onclick=function(){
-        var idx=parseInt(el.getAttribute("data-i"),10);
-        if(isNaN(idx)) return;
-        el.className="card act go";
-        warpOut(); tearOut();
-        setTimeout(function(){ openPv(found[idx]); },110);
-      };
-    })(list[j]);
-  }
+  emptyEl.style.display=list.length?"none":"block";
+  cnt.innerHTML="共 <b>"+list.length+"</b> 个页面";
 }
 
-/* ══════════ 跃迁 ══════════ */
-var warpEl=document.getElementById("warp");
-var shockEl=document.getElementById("shock");
-function warpOut(){
-  try{
-    warpEl.className=""; void warpEl.offsetWidth; warpEl.className="go";
-    shockEl.className=""; void shockEl.offsetWidth; shockEl.className="go";
-  }catch(e){}
-}
+/* ── 全屏预览 ──
+   打开方式保留 iframe（列表页不卸载 → 背景音乐不会断），
+   但「返回方式」还原成原来的习惯：按系统返回键 / 手机左滑返回 就能回列表。
+   做法：打开时往历史栈压一条记录，返回键触发 popstate 时收起预览。
+   ────────────────────────────────────────────────────────
+   如果你更想要「原来的新窗口打开」（子页面独立成页，音乐会停），
+   把下面 PV_MODE 改成 "blank" 即可，一行切换。 */
+var PV_MODE = "iframe";      // "iframe" = 内嵌+返回键返回；"blank" = 新窗口打开
 
-/* ══════════ 数据撕裂转场 ══════════ */
-var tearEl=document.getElementById("tear");
-function tearOut(){
-  if(!tearEl) return;
-  try{
-    var html="",i,n=7,h,top,d;
-    for(i=0;i<n;i++){
-      h=2+Math.random()*13;
-      top=(i/n)*100+Math.random()*4;
-      d=(Math.random()>0.5?1:-1)*(60+Math.random()*90);
-      html+='<i style="top:'+top.toFixed(1)+'%;height:'+h.toFixed(1)+'px;'+
-        '--dx:'+d.toFixed(0)+'px;-webkit-animation-delay:'+(i*0.012).toFixed(3)+'s;'+
-        'animation-delay:'+(i*0.012).toFixed(3)+'s"></i>';
-    }
-    tearEl.innerHTML=html;
-    tearEl.className="on";
-    var bars=tearEl.querySelectorAll("i");
-    for(i=0;i<bars.length;i++){
-      void bars[i].offsetWidth;
-      bars[i].className="go";
-    }
-    setTimeout(function(){ tearEl.className=""; tearEl.innerHTML=""; },620);
-  }catch(e){}
-}
-
-/* ══════════ 预览 ══════════ */
 var pvEl=document.getElementById("pv");
 var pvF=document.getElementById("pvF");
 var pvT=document.getElementById("pvT");
-var pvL=document.getElementById("pvL");
-var pvBusy=0,scrollLock=0,pvPushed=false;
+var pvClose=document.getElementById("pvClose");
+var pvNew=document.getElementById("pvNew");
+var pvCur=null, pvPushed=false;
 
-var pvSeq=0,backGuard=0;
+/* ★ 打开预览为什么要用 location.replace 而不是 pvF.src？
 
-/* ★ 手机端返回键的核心修复：每次都用全新的 iframe 节点。
-   直接给同一个 iframe 改 src，会在 iframe 内部留下历史条目；
-   iOS Safari / 微信 X5 会把它并进主历史栈，于是按返回要按两次，
-   或者干脆直接退出整个页面。重建节点后 iframe 历史永远只有一条。 */
-function freshFrame(){
+   WebKit（iOS Safari / 微信 iOS 内核）会把「iframe 的导航」也记进
+   浏览器的联合会话历史里。也就是说执行 pvF.src = "xxx.html" 时，
+   历史栈里会多出一条看不见的条目。
+
+   后果正好就是用户描述的症状：
+     打开预览 → 历史栈 [列表, (iframe条目), #w-预览]
+     按返回   → 回到 iframe 条目：顶层页面没变（不触发 popstate），
+                但 iframe 被还原成空白 → 看到一大片白页
+     再按返回 → 才触发 popstate，收起预览，回到列表
+
+   用 contentWindow.location.replace() 是「替换」当前条目而不是「新增」，
+   不会产生多余的历史条目，第一次按返回就能直接回到列表。
+   万一取不到 contentWindow（跨域等异常），才退回 src 方式。 */
+function pvLoad(url){
   try{
-    var nf=document.createElement("iframe");
-    nf.id="pvF";
-    nf.setAttribute("frameborder","0");
-    var box=pvF.parentNode;
-    if(!box) return;
-    box.replaceChild(nf,pvF);
-    pvF=nf;
+    var cw=pvF && pvF.contentWindow;
+    if(cw && cw.location && cw.location.replace){ cw.location.replace(url); return; }
   }catch(e){}
+  if(pvF) pvF.src=url;
 }
 
-function openPv(item){
-  if(!item) return;
-  var now=Date.now();
-  if(pvBusy&&now-pvBusy<600) return;      /* 防连点 */
-  pvBusy=now;
-  pvT.textContent=item.title;
-  pvL.style.display="block";
-  freshFrame();
-  pvF.onload=function(){ pvL.style.display="none"; };
-  pvF.src=item.url+"?_embed=1&_v="+V;
-  pvEl.className="on";
-  paused=true;
-  scrollLock=document.getElementById("wrap").scrollTop;
-  try{ document.getElementById("wrap").style.overflow="hidden"; }catch(e){}
-  try{ document.body.className="pvfreeze"; }catch(e){}
-  last=0;                        /* 重置时间基准，关闭时不会跳一大帧 */
-  stopFx();                      /* 连 rAF 也停：主页面完全不占 CPU */
-  freshFrame();
-  pvSeq++;
-  pvPushed=false;
-  if(window.history&&history.pushState){
+/* 关闭后销毁 iframe 并重建：
+   · 彻底终止子页面的音频/动画/定时器（比置 about:blank 更干净）
+   · 新建的 iframe 初始 about:blank 不会产生历史条目 */
+function pvRecycle(){
+  if(!pvEl) return;
+  var old=pvF;
+  var nf=document.createElement("iframe");
+  nf.id="pvF"; nf.setAttribute("allow","autoplay");
+  if(old && old.parentNode) old.parentNode.replaceChild(nf, old);
+  pvF=nf;
+}
+
+/* ★ 兜底：万一某些内核仍然为 iframe 导航留了一条历史条目，
+   用户按返回时会先落到那条条目上 —— 顶层页面不变（不触发 popstate），
+   但 iframe 被还原成 about:blank，于是看到一大片白。
+   这里监听 iframe 的 load：如果它"曾经加载成功过、现在又变回空白"，
+   就判定是历史回溯把它清空了，直接收起预览，不让用户看到白页。 */
+var pvLoaded=false;
+function watchPvBlank(){
+  if(!pvF) return;
+  pvF.onload=function(){
+    var href="";
+    try{ href=(pvF.contentWindow && pvF.contentWindow.location && pvF.contentWindow.location.href)||""; }
+    catch(e){ return; }                       // 跨域读不到 → 当作正常
+    if(!href || href==="about:blank"){
+      if(pvLoaded && pvEl && pvEl.classList.contains("on")) hidePv();
+    }else{
+      pvLoaded=true;
+    }
+  };
+}
+
+function openPv(p){
+  if(PV_MODE==="blank"){ window.open(p.f,"_blank","noopener"); return; }
+  if(!pvEl||!pvF){ location.href=p.f; return; }
+  pvCur=p;
+  if(pvT) pvT.textContent=(p.t||p.f)+(p.f?"  ·  "+p.f:"");
+  pvLoaded=false;
+  watchPvBlank();
+  /* ★ 和 fetchText 读标题用的是同一个 pageUrl()：
+       同一个 URL → 命中同一份缓存 → 预览几乎秒开，不会重复下载。
+     ★ 带 _v 会话版本号 → 刷新列表页后点开，一定是服务器上最新的那版。
+     _embed=1 是告诉子页面"你嵌在别人里面"，不要再自己放一份音乐。 */
+  pvLoad(pageUrl(p.f));
+  pvEl.classList.add("on");
+  document.body.classList.add("pvopen");
+  try{ document.documentElement.style.overflow="hidden"; }catch(e){}
+
+  // 压一条历史记录 → 系统返回键 / 左滑返回 会先收起预览，而不是直接离开本站
+  if(!pvPushed){
     try{
-      /* 同时改 hash：老内核对 pushState 触发的 popstate 不可靠，
-         而 hashchange 一定触发。两个事件都监听，用 backGuard 去重。 */
-      history.pushState({pv:1},"","#pv"+pvSeq);
+      history.pushState({pv:1,f:p.f}, "", location.pathname+location.search+"#w-"+encodeURIComponent(p.f.replace(/\.html?$/i,"")));
       pvPushed=true;
-    }catch(e){
-      try{ history.pushState({pv:1},""); pvPushed=true; }catch(e2){}
-    }
+    }catch(e){}
   }
-  /* 把焦点拿回主文档，否则 Android 上返回键可能被 iframe 先消费掉 */
-  try{ window.focus(); }catch(e){}
 }
-function closePv(silent){
-  pvF.onload=null;
-  freshFrame();          /* 不是 about:blank —— 只有重建才能真正清掉 iframe 历史 */
-  pvEl.className="";
-  paused=false;
-  try{ document.body.className=""; }catch(e){}
-  try{
-    var w=document.getElementById("wrap");
-    w.style.overflow=""; w.scrollTop=scrollLock;   /* 回到原来的位置，不会跳到顶 */
-  }catch(e){}
-  last=0;
-  startFx();
-  pvL.style.display="none";
-  pvBusy=0;
-  /* ★ 手机端关键修复：
-     只有确实 pushState 成功过，才能用 history.go(-1) 抵消这一步。
-     否则（老内核 / 隐私模式 / 某些 WebView 里 pushState 会抛错），
-     go(-1) 会把用户直接带离整个网站 —— 点"返回"按钮就退出去了。
-     没 push 成功就只做静默关闭，绝不冒险回退。 */
-  if(!silent&&pvPushed){
+
+// 只做视觉收起，不碰历史栈
+function hidePv(){
+  if(!pvEl) return;
+  pvEl.classList.remove("on");
+  document.body.classList.remove("pvopen");
+  try{ document.documentElement.style.overflow=""; }catch(e){}
+  pvCur=null; pvLoaded=false;
+  if(pvF) pvF.onload=null;
+  /* 重建 iframe 才会真正停掉子页面的声音/动画。
+     ★ 不能像以前那样置成 about:blank —— 那也是一次导航，
+       在 WebKit 里同样会往历史栈里加条目，等于把问题又造了一遍。
+     另外延迟要大于淡出时间，避免用户看到 iframe 突然变空白。 */
+  setTimeout(function(){
+    if(!pvEl.classList.contains("on")) pvRecycle();
+  },420);
+}
+
+// 关闭按钮 / Esc：走 history.back()，让历史栈保持干净（等价于按返回键）
+function closePv(){
+  if(pvPushed){
     pvPushed=false;
-    if(window.history&&history.go){ try{ history.go(-1); }catch(e){} }
+    try{ history.back(); }catch(e){ hidePv(); }
+    // history.back() 是异步的，兜底：若 350ms 后还没收起就直接收
+    setTimeout(function(){
+      if(pvEl && pvEl.classList.contains("on")) hidePv();
+    },350);
+  }else hidePv();
+}
+
+/* ★ 子页面自己也有层级：
+   比如「许愿的灯」里点开一张照片看大图，它会往历史栈压一条。
+   用户按返回键时应该先收起那张大图，回到满天灯的画面，
+   而不是一下子关掉整个预览、退回列表页。
+   所以这里先同步问一句子页面："这次返回你处理了吗？"
+   它答 true 就说明它自己收了大图，预览继续开着。 */
+function pvChildConsume(){
+  try{
+    var w = pvF && pvF.contentWindow;
+    if(w && typeof w.__pvOnBack === "function") return !!w.__pvOnBack();
+  }catch(e){}          // 跨域读不到 → 当作没处理
+  return false;
+}
+
+// ★ 系统返回键 / 手机左滑返回 → 收起预览（这就是"原来的返回方式"）
+window.addEventListener("popstate",function(){
+  /* 预览开着、且子页面自己消费了这次返回 → 保持预览，历史栈不动 */
+  if(pvEl && pvEl.classList.contains("on") && pvChildConsume()){
+    pvPushed=true;     // 预览那一条还在栈里，标记保留
+    return;
   }
   pvPushed=false;
-}
-window.__pvOnBack=function(){
-  if(pvEl.className==="on"){ closePv(true); return true; }
-  return false;
-};
-document.getElementById("pvBack").onclick=function(){ closePv(false); };
+  if(pvEl && pvEl.classList.contains("on")) hidePv();
+});
 
-var lastBackHash="__none__";
-function onBack(){
-  if(pvEl.className!=="on") return;
-  var h="";
-  try{ h=window.location.hash||""; }catch(e){}
+/* ══════ 禁掉"整页放大"手势 ══════
+   ★ 子页面（孔明灯 / 银河 / 魔方）是 iframe 嵌在这里的。
+     手指在 iframe 里捏合时，iOS / 安卓缩放的是【顶层文档】也就是本页，
+     结果整个列表页被放大，子页面被推歪 —— 露出刺眼的色块。
+   ① gesturestart/gesturechange/gestureend：iOS Safari 专用
+   ② 多指 touchmove preventDefault：安卓 & iOS 通用
+   ⚠ 只在两指及以上时拦截，单指滚动照常，不影响列表上下滑。 */
+["gesturestart","gesturechange","gestureend"].forEach(function(ev){
+  document.addEventListener(ev, function(e){ e.preventDefault(); }, {passive:false});
+});
+document.addEventListener("touchmove", function(e){
+  if(e.touches && e.touches.length > 1) e.preventDefault();
+}, {passive:false});
+var lastTouchEnd=0;
+document.addEventListener("touchend", function(e){
   var now=Date.now();
-  /* ★ 手机端关键修复：
-     用户按一次返回，popstate 和 hashchange 可能都触发（同一 hash、间隔极短），
-     必须去重；但如果只按时间窗口拦，用户"收起大图后马上再按一次"会被误吞，
-     看着像返回键失灵。
-     所以只在【hash 完全相同】时才算重复事件 —— hash 变了说明用户真的又按了。 */
-  if(h===lastBackHash && now-backGuard<400) return;
-  lastBackHash=h;
-  backGuard=now;
-  var consumed=false;
-  try{
-    var w=pvF.contentWindow;
-    if(w&&typeof w.__pvOnBack==="function") consumed=w.__pvOnBack();
-  }catch(e){ consumed=false; }
-  if(consumed){
-    /* 子页面自己处理了（比如孔明灯先收起大图），父页面补回这一步，预览保持打开 */
-    if(window.history&&history.pushState){
-      try{ history.pushState({pv:1},"","#pv"+(++pvSeq)); }catch(e){}
-    }
-  }else{
-    closePv(true);
-  }
-}
-window.addEventListener("popstate",onBack,false);
-window.addEventListener("hashchange",onBack,false);
+  if(now - lastTouchEnd < 300) e.preventDefault();   // 双击放大也拦掉
+  lastTouchEnd=now;
+}, {passive:false});
 
-/* 刷新时若 URL 残留 #pvN，先清掉，避免历史栈错位 */
+/* ══════ 兜底：万一浏览器还是把整页放大了 ══════
+   ★ 子页面（孔明灯）是 iframe，iframe 里的多指 touch 事件
+     【不会冒泡到顶层 document】，所以顶层的 preventDefault 抓不到。
+     在 iOS Safari / 部分安卓上，捏合缩放的是顶层 viewport，
+     于是整个预览被放大，子页面被推歪、露出刺眼色块。
+   这里监听顶层的 visualViewport：一旦 scale 偏离 1，
+   就给 <html> 做反向 zoom 抵消（放大 s 倍 → 缩回 1/s），
+   视觉上画面恢复原样。 */
+var vvLocked=false;
+function vvCompensate(){
+  if(vvLocked) return;
+  var vv = window.visualViewport;
+  if(!vv) return;
+  var s = vv.scale || 1;
+  if(!isFinite(s) || s<=0) return;
+  vvLocked = true;
+  try{
+    var de = document.documentElement;
+    if(Math.abs(s-1) > 0.02){
+      de.style.zoom = (1/s).toFixed(4);       // Chrome / Safari / Edge 支持
+    }else{
+      de.style.zoom = "";
+    }
+  }catch(e){}
+  vvLocked = false;
+}
+if(window.visualViewport){
+  try{
+    window.visualViewport.addEventListener("resize", vvCompensate);
+    window.visualViewport.addEventListener("scroll", vvCompensate);
+  }catch(e){}
+  setInterval(vvCompensate, 700);
+}
+
+// 首次进入若残留 #w- 记录，清掉，避免刷新后状态错乱
 try{
-  if(window.location&&window.location.hash&&window.location.hash.indexOf("#pv")===0){
+  if(location.hash && location.hash.indexOf("#w-")===0){
     history.replaceState(null,"",location.pathname+location.search);
   }
 }catch(e){}
 
-/* ══════════ 音效（Web Audio 实时合成，零文件体积）══════════ */
-var AC=null,SFX=true;
-function acx(){
-  if(AC) return AC;
-  try{
-    var C=window.AudioContext||window.webkitAudioContext;
-    if(!C) return null;
-    AC=new C();
-  }catch(e){ AC=null; }
-  return AC;
-}
-/* ★ 浏览器要求真实手势后才能出声，每次点击都尝试解锁 */
-function unlockAudio(){
-  var c=acx();
-  if(c&&c.state==="suspended"){ try{ c.resume(); }catch(e){} }
-}
-function beep(freq,dur,type,vol,slide){
-  if(!SFX) return;
-  var c=acx();
-  if(!c) return;
-  try{
-    var o=c.createOscillator(),g=c.createGain(),t=c.currentTime;
-    o.type=type||"square";
-    o.frequency.setValueAtTime(freq,t);
-    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,slide),t+dur);
-    g.gain.setValueAtTime(0.0001,t);
-    g.gain.linearRampToValueAtTime(vol||0.04,t+0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g); g.connect(c.destination);
-    o.start(t); o.stop(t+dur+0.03);
-  }catch(e){}
-}
-function sfxDone(){
-  beep(660,0.13,"triangle",0.05);
-  setTimeout(function(){ beep(880,0.13,"triangle",0.05); },90);
-  setTimeout(function(){ beep(1320,0.20,"triangle",0.045); },180);
-}
-var mSfx=document.getElementById("mSfx");
-if(mSfx){
-  try{
-    var saved=window.localStorage&&localStorage.getItem("nx_sfx");
-    SFX=(saved!=="0");
-  }catch(e){}
-  mSfx.className="mbtn sm"+(SFX?"":" off");
-  mSfx.onclick=function(){
-    SFX=!SFX;
-    mSfx.className="mbtn sm"+(SFX?"":" off");
-    try{ if(window.localStorage) localStorage.setItem("nx_sfx",SFX?"1":"0"); }catch(e){}
-    if(SFX) beep(880,0.08,"triangle",0.035);
-  };
-}
+if(pvClose) pvClose.onclick=closePv;
+if(pvNew) pvNew.onclick=function(){ if(pvCur) window.open(pvCur.f,"_blank","noopener"); };
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape" && pvEl && pvEl.classList.contains("on")) closePv();
+});
 
-/* ══════════ 音乐 ══════════ */
-/* ┌──────────────────────────────────────────────────────────┐
-   │  想改歌名 / 换文件？只改下面这两行就行，不用动别处。       │
-   └──────────────────────────────────────────────────────────┘
-
-   ① 文件名：放在 music/ 文件夹里，【按你想听的顺序】填。
-      想加歌就往后加，最多 12 首。文件名可以随便起。 */
-var MUSIC_FILES=[
-  "bgm.mp3","song1.mp3","song2.mp3","song3.mp3","song4.mp3","song5.mp3"
-];
-/* ② 显示名：按顺序对应上面的文件。
-      填了就显示你填的（推荐，能显示真实歌名）；
-      留空 [] 就自动用文件名。
-      例：var MUSIC_TITLES=["晴天","稻香","七里香"];             */
-var MUSIC_TITLES=[];
-
-/* 音乐放在 music/ 文件夹；若没有该文件夹，自动退回根目录（兼容旧布局）。
-   两个位置都放时只用 music/，不会重复。 */
-var MUSIC_NAMES=MUSIC_FILES;
-var MUSIC_DIR=[],MUSIC_ROOT=[],_mi;
-for(_mi=0;_mi<MUSIC_NAMES.length;_mi++){
-  MUSIC_DIR.push("music/"+MUSIC_NAMES[_mi]);
-  MUSIC_ROOT.push(MUSIC_NAMES[_mi]);
-}
-var tracks=[],mi=0,aud=null,playing=false;
-var mMain=document.getElementById("mMain");
-var mNext=document.getElementById("mNext");
-var mName=document.getElementById("mName");
-
-/* 曲名解析：优先用你填的显示名 → 其次用文件名 → 最后才是"音轨 01"这种兜底 */
-function niceName(f,idx){
-  /* ① 用户填了显示名 */
-  if(MUSIC_TITLES&&MUSIC_TITLES.length&&idx!==undefined&&idx!=null&&
-     typeof MUSIC_TITLES[idx]==="string"&&MUSIC_TITLES[idx]!==""){
-    return MUSIC_TITLES[idx];
-  }
-  var b=f,k=f.lastIndexOf("/");
-  if(k>=0) b=f.slice(k+1);                    /* 去掉 music/ 前缀 */
-  b=b.replace(/\.[^.]+$/,"");                 /* 去掉扩展名 */
-  var m1=/^bgm$/i.exec(b);
-  if(m1) return "环境音轨";
-  var m=/^song[_\- ]?(\d+)$/i.exec(b);        /* song1 / song_1 / song-1 都认 */
-  if(m) return "音轨 "+pad2(parseInt(m[1],10));
-  /* 真实文件名（如"周杰伦 - 晴天"）直接显示，不做改写 */
-  return b;
-}
-/* 顶部那行：序号 / 总数 · 曲名 —— 一眼看出"在按顺序放第几首" */
-function trackLabel(i){
-  if(!tracks.length) return "";
-  return pad2(i+1)+" / "+pad2(tracks.length)+" · "+niceName(tracks[i],i);
-}
-/* 探测一组候选；探测与播放用同一个 URL（都带 _v），浏览器只下载一次 */
-function probeList(list,i,next){
-  if(i>=list.length){ next(); return; }
-  var f=list[i],a=null;
-  try{ a=new Audio(); }catch(e){ probeList(list,i+1,next); return; }
+/* ★★ ES5 化：
+   原来用 async/await + fetch（都是 ES2017/ES6）。
+   老 iOS Safari(<iOS 11)、微信 X5 旧内核遇到 async 关键字会
+   【整段 script 编译失败】—— 不是某个功能坏，是整个列表页全废：
+   没有卡片、没有音乐、按钮全失灵，只剩一个空壳。
+   fetch 在那些内核里更是根本不存在。
+   → 全部改成 XMLHttpRequest + 回调，ES5 语法，任何内核都能跑。 */
+function xhr(u, method, range, cb){
+  var x;
+  try{ x=new XMLHttpRequest(); }catch(e){ cb(-1); return; }
   var done=false;
-  var t=setTimeout(function(){ if(!done){ done=true; a.src=""; probeList(list,i+1,next); } },4500);
-  function ok(){ if(done)return; done=true; clearTimeout(t); tracks.push(f); probeList(list,i+1,next); }
-  function no(){ if(done)return; done=true; clearTimeout(t); a.src=""; probeList(list,i+1,next); }
-  a.addEventListener("canplay",ok,false);
-  a.addEventListener("loadedmetadata",ok,false);
-  a.addEventListener("error",no,false);
-  try{ a.preload="metadata"; a.src=f+"?_v="+V; }catch(e){ no(); }
+  function fin(status){
+    if(done) return;
+    done=true;
+    try{ x.onreadystatechange=null; }catch(e){}
+    if(tmr){ clearTimeout(tmr); tmr=0; }
+    cb(status);
+  }
+  var tmr=setTimeout(function(){ try{x.abort();}catch(e){} fin(-1); }, 8000);
+  try{
+    x.onreadystatechange=function(){
+      if(x.readyState===4) fin(x.status);
+    };
+    x.open(method, u, true);
+    if(range){ try{ x.setRequestHeader("Range", range); }catch(e){} }
+    x.send(null);
+  }catch(e){ fin(-1); }
 }
-function probeMusic(){
-  probeList(MUSIC_DIR,0,function(){
-    if(tracks.length===0) probeList(MUSIC_ROOT,0,initMusicUI);
-    else initMusicUI();
+
+function exists(f, cb, bust){
+  /* ★ BUG 修复：原来给探测 URL 加了时间戳 + Cache-Control:no-store。
+     探测用的是 /song1.mp3?_=123，正式播放用 /song1.mp3 —— 两个不同的缓存键，
+     等于同一首歌要下载两遍（探测一遍、播放一遍）。
+     探测只是想知道"在不在"，HEAD 本身很轻，不需要防缓存。
+     ★ 唯一例外：点"重新扫描"时 bust=true 强制绕缓存，
+       否则之前探测过 404 的文件会被浏览器记住，
+       用户刚上传的新页面永远扫不出来。 */
+  var u = bust ? (f+"?_="+Date.now()) : f;
+  /* 先试 HEAD（省流量）；部分服务器(IIS/静态托管)不支持 HEAD 或返回 405，
+     这时退回 GET + Range 只取 1 字节，避免把整个文件下载下来 */
+  xhr(u,"HEAD",null,function(st){
+    if(st>=200 && st<400){ cb(true); return; }
+    if(st!==405 && st!==501 && st!==403 && st>0){ cb(false); return; }
+    xhr(u,"GET","bytes=0-0",function(st2){
+      cb(st2>=200 && st2<400);
+    });
   });
 }
-function initMusicUI(){
-  if(tracks.length===0){
-    mMain.className="mbtn off"; mNext.className="mbtn sm off";
-    mMain.innerHTML="♪"; setT(""); mName.className="";
-    if(mPrev) mPrev.className="mbtn sm off";
-    if(mList) mList.className="mbtn sm off";
-    return;
+
+/* 并行探测一组文件，全部完成后回调（ES5，无 Promise）*/
+function existsAll(list, cb, bust){
+  var res=new Array(list.length), pending=list.length;
+  for(var i=0;i<list.length;i++) res[i]=false;
+  if(!list.length){ cb(res); return; }
+  for(var j=0;j<list.length;j++){
+    (function(k){
+      exists(list[k], function(ok){
+        res[k]=!!ok;
+        pending--;
+        if(pending<=0) cb(res);
+      }, bust);
+    })(j);
   }
-  /* 恢复上次听到的那一首 */
-  if(tracks.length>1) mi=Math.min(loadLast(),tracks.length-1);
-  mMain.className="mbtn"; mMain.innerHTML="▶";
-  mNext.className="mbtn sm"+(tracks.length>1?"":" off");
-  if(mPrev) mPrev.className="mbtn sm"+(tracks.length>1?"":" off");
-  if(mList) mList.className="mbtn sm"+(tracks.length>1?"":" on");
-  setT(trackLabel(mi));
-  mName.className="on";
-  buildList();
 }
-/* ★ 顺序播放的核心：ended 事件 → 下一首。
-   最后一首播完自动回到第 1 首（mi+1 取模），整张列表循环。 */
-function ensureAud(){
-  if(!aud){
-    try{ aud=new Audio(); }catch(e){ return null; }
-    aud.addEventListener("ended",function(){ nextTrack(true); },false);
-    aud.addEventListener("timeupdate",onTime,false);
-    aud.addEventListener("loadedmetadata",onTime,false);
-    aud.addEventListener("play",function(){
-      playing=true; mMain.innerHTML="❚❚"; mMain.className="mbtn playing";
-      document.getElementById("mName").className="on";
-    },false);
-    aud.addEventListener("pause",function(){
-      playing=false; mMain.innerHTML="▶"; mMain.className="mbtn";
-    },false);
-    aud.addEventListener("error",function(){
-      playing=false; mMain.innerHTML="▶"; mMain.className="mbtn";
-      /* ★ 单曲损坏时不要卡死：自动跳下一首，最多试完整轮 */
-      if(tracks.length>1&&!_skipGuard){
-        _skipGuard=true;
-        nextTrack(true);
-        setTimeout(function(){ _skipGuard=false; },600);
+
+/* ★★ 会话版本号（本轮修复："覆盖了还是老效果"的根因）★★
+
+   先说结论：列表页【一直都识别 p1.html ~ p30.html】，
+   这次的锅不是文件名，是【浏览器缓存】。
+
+   你覆盖 p1.html 后刷新列表页，浏览器里还留着上一版的 p1.html，
+   于是"读标题"和"点开预览"拿到的都是旧内容 —— 看起来就像没覆盖成功。
+
+   修法：每次列表页加载就生成一个新的版本号 _v，
+   所有对子页面的请求都带上它。
+     · 刷新列表页 → 版本号变 → 自动绕开旧缓存 → 拿到最新内容 ✅
+     · 同一会话内版本号不变 → 多次预览仍走缓存，不会重复下载 ✅
+
+   ★ 读标题和预览必须用【完全一样】的 URL，否则又会变成下载两遍
+     （这正是之前修过的一个 bug，不能重蹈覆辙）。 */
+var SESSION_V = (Date.now()%1000000000).toString(36);
+
+/* 子页面的统一 URL：读标题和打开预览共用这一份，缓存才能复用 */
+function pageUrl(f){
+  return f + "?_embed=1&_v=" + SESSION_V;
+}
+/* 强制绕缓存（仅"重新扫描"时用）*/
+function withBust(u){
+  return u + (u.indexOf("?")>-1 ? "&" : "?") + "_b=" + Date.now();
+}
+
+/* 读取一个文件内容（ES5 XHR）*/
+function fetchText(f, cb, bust){
+  if(bust===undefined) bust=SCAN_BUST;
+  var x;
+  try{ x=new XMLHttpRequest(); }catch(e){ cb(null); return; }
+  var done=false, tmr=setTimeout(function(){ if(done)return; done=true; try{x.abort();}catch(e){} cb(null); },8000);
+  try{
+    x.onreadystatechange=function(){
+      if(x.readyState!==4) return;
+      if(done) return;
+      done=true; clearTimeout(tmr);
+      cb(x.status>=200 && x.status<400 ? x.responseText : null);
+    };
+    /* ★ 读标题用 pageUrl(f) —— 和打开预览用的是同一个 URL，
+       所以读标题时下载的那份，点开预览时直接命中缓存，秒开。
+       ★ 但 URL 里带会话版本号 _v，刷新列表页就会自动取到最新的子页面，
+         不会再出现"明明覆盖了却还是老效果"。
+       "重新扫描"时再叠一个 _b 时间戳，强制彻底绕缓存。 */
+    var u = pageUrl(f);
+    if(bust) u = withBust(u);
+    x.open("GET", u, true);
+    x.send(null);
+  }catch(e){ if(!done){ done=true; clearTimeout(tmr); cb(null); } }
+}
+
+function scan(){
+  var useBust=_bust; _bust=false;   /* "重新扫描"时才强制绕缓存 */
+  SCAN_BUST=useBust;
+  cnt.textContent="正在扫描…";
+  var all=[];
+  FIXED.forEach(function(x){ all.push(x.f); });
+  SLOTS.forEach(function(f){ all.push(f); });
+
+  existsAll(all, function(checks){
+    var files=[];
+    FIXED.forEach(function(x,i){ if(checks[i]) files.push(x.f); });
+    SLOTS.forEach(function(f,i){ if(checks[FIXED.length+i]) files.push(f); });
+
+    /* 读取每个文件的标题（自动取名，换设备也一样）*/
+    var left=files.length;
+    if(!left){ FOUND=[]; draw(); return; }
+    files.forEach(function(f){
+      fetchText(f, function(t){
+        if(t){
+          try{
+            AUTO[f]=readMeta(t,f);
+            var fx=FIXED.filter(function(x){return x.f===f;})[0];
+            if(fx && fx.d && !AUTO[f].d) AUTO[f].d=fx.d;
+          }catch(e){
+            AUTO[f]={t:f.replace(/\.html?$/i,""),d:"",e:pickEmoji(f)};
+          }
+        }else{
+          AUTO[f]={t:f.replace(/\.html?$/i,""),d:"",e:pickEmoji(f)};
+        }
+        left--;
+        if(left<=0){ FOUND=files; draw(); }
+      }, SCAN_BUST);
+    });
+  }, SCAN_BUST);
+}
+
+/* ── 编辑弹窗（仅本机）── */
+var mask=document.getElementById("mask");
+var pick="📄";
+function openModal(p){
+  document.getElementById("m_title").textContent="编辑页面";
+  document.getElementById("m_key").value=p.f;
+  document.getElementById("m_t").value=p.t;
+  document.getElementById("m_f").value=p.f;
+  document.getElementById("m_d").value=p.d;
+  pick=p.e;
+  renderEmojis();
+  mask.classList.add("on");
+}
+function renderEmojis(){
+  var box=document.getElementById("m_e"); box.innerHTML="";
+  EMOJIS.forEach(function(e){
+    var b=document.createElement("button");
+    b.type="button"; b.textContent=e;
+    if(e===pick) b.className="on";
+    b.onclick=function(){
+      pick=e;
+      [].forEach.call(box.children,function(x){x.className="";});
+      b.className="on";
+    };
+    box.appendChild(b);
+  });
+}
+document.getElementById("addBtn").onclick=function(){
+  document.getElementById("m_title").textContent="添加页面";
+  document.getElementById("m_key").value="";
+  document.getElementById("m_t").value="";
+  document.getElementById("m_f").value="";
+  document.getElementById("m_f").disabled=false;
+  document.getElementById("m_d").value="";
+  pick="✨"; renderEmojis(); mask.classList.add("on");
+};
+document.getElementById("m_cancel").onclick=function(){
+  mask.classList.remove("on");
+  document.getElementById("m_f").disabled=true;
+};
+mask.onclick=function(e){ if(e.target===this){this.classList.remove("on");document.getElementById("m_f").disabled=true;} };
+document.getElementById("m_ok").onclick=function(){
+  var key=document.getElementById("m_key").value.trim();
+  var t=document.getElementById("m_t").value.trim();
+  var f=document.getElementById("m_f").value.trim();
+  var d=document.getElementById("m_d").value.trim();
+  if(!f){ alert("文件名必须填"); return; }
+  if(!/\.html?$/i.test(f)) f+=".html";
+  if(!t) t=f.replace(/\.html?$/i,"");
+
+  if(key){
+    META[f]={t:t,d:d,e:pick};
+    localStorage.setItem("pagemeta",JSON.stringify(META));
+  }else{
+    // 同名只保留一条，否则反复添加会堆叠出越来越多重复项
+    for(var li=LOCAL.length-1;li>=0;li--){
+      if(LOCAL[li].f===f) LOCAL.splice(li,1);
+    }
+    LOCAL.push({t:t,f:f,d:d,e:pick});
+    localStorage.setItem("mypages",JSON.stringify(LOCAL));
+  }
+  mask.classList.remove("on");
+  document.getElementById("m_f").disabled=true;
+  draw();
+};
+
+/* ── 自检 ── */
+document.getElementById("diagBtn").onclick=function(){
+  var btn=this, old=btn.textContent;
+  btn.textContent="检测中…"; btn.disabled=true;
+  diag.classList.add("on"); diag.textContent="正在检测…\n";
+  var all=FIXED.map(function(x){return x.f;}).concat(SLOTS).concat(LOCAL.map(function(p){return p.f;}));
+  existsAll(all, function(res){
+    var rs=[];
+    all.forEach(function(f,i){ rs.push({f:f, ok:res[i]}); });
+    (function(rs){
+    var ok=rs.filter(function(r){return r.ok;});
+    var lines=ok.map(function(r){
+      var it=AUTO[r.f];
+      return "✅ "+r.f+(it?"  →  "+it.e+" "+it.t:"");
+    });
+    if(!lines.length) lines.push("（一个都没检测到）");
+    lines.push("");
+    lines.push("—— 目录里没有的（正常，没上传就没有）——");
+    rs.filter(function(r){return !r.ok;}).slice(0,35).forEach(function(r){lines.push("· "+r.f);});
+    diag.textContent=lines.join("\n");
+    btn.textContent=old; btn.disabled=false;
+    })(rs);
+  }, true);
+};
+/* ★ "重新扫描"传 bust=true：强制绕开缓存取最新的 title。
+   普通扫描不带 bust，与 iframe 预览共用缓存（预览秒开）。 */
+var _bust=false, SCAN_BUST=false;
+document.getElementById("rescan").onclick=function(){ _bust=true; scan(); };
+/* 在管理面板显示本次索引的版本号 —— 刷新后这串字符会变，
+   一眼就能确认自己看到的是不是最新版。 */
+(function(){
+  var vt=document.getElementById("verTag");
+  if(vt) vt.textContent="本页索引版本 "+SESSION_V;
+})();
+document.getElementById("q").oninput=function(){ kw=this.value.trim().toLowerCase(); draw(); };
+
+/* ══════════════ 爱心渐变流星雨 ══════════════ */
+(function(){
+  var box=document.getElementById("shower");
+  var PAL=[
+    ["#ff5c8a","#ffc2d1"],["#ff87ab","#ffe0ec"],["#c86dd7","#e9d5ff"],
+    ["#ff6f9c","#ffd6e5"],["#a06bd8","#dcc7ff"],["#ff9ec4","#fff0f6"],
+    ["#f06292","#f8bbd0"],["#ba68c8","#e1bee7"]
+  ];
+  var uid=0;
+  function heartSVG(id,c1,c2){
+    return '<svg viewBox="0 0 32 29"><defs><linearGradient id="g'+id+'" x1="0" y1="0" x2="1" y2="1">'+
+      '<stop offset="0%" stop-color="'+c1+'"/><stop offset="100%" stop-color="'+c2+'"/>'+
+      '</linearGradient></defs>'+
+      '<path fill="url(#g'+id+')" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4'+
+      'c0,9.4,9.5,11.9,16,20.6c6.1-8.7,16-11.2,16-20.6C32,3.8,28.2,0,23.6,0z"/></svg>';
+  }
+  function make(){
+    var el=document.createElement("div");
+    el.className="drop";
+    var p=PAL[Math.floor(Math.random()*PAL.length)];
+    el.innerHTML=heartSVG(uid++,p[0],p[1]);
+    el.style.setProperty("--fs",(12+Math.random()*20).toFixed(0)+"px");
+    el.style.setProperty("--g1",p[0]);
+    el.style.setProperty("--dur",(7+Math.random()*9).toFixed(1)+"s");
+    el.style.setProperty("--delay",(-Math.random()*16).toFixed(1)+"s");
+    el.style.setProperty("--dx",(Math.random()*160-80).toFixed(0)+"px");
+    el.style.setProperty("--op",(0.45+Math.random()*0.5).toFixed(2));
+    var r=Math.random()*40-20;
+    el.style.setProperty("--r0",r.toFixed(0)+"deg");
+    el.style.setProperty("--r1",(r+(Math.random()*180-90)).toFixed(0)+"deg");
+    el.style.left=(Math.random()*104-2).toFixed(1)+"vw";
+    box.appendChild(el);
+  }
+  var n=innerWidth<520?24:40;
+  for(var i=0;i<n;i++) make();
+})();
+
+/* ══════════════ 背景音乐 ══════════════ */
+(function(){
+  var audio=document.getElementById("audio");
+  var mBtn=document.getElementById("music");
+  var panel=document.getElementById("mpanel");
+  var mlist=document.getElementById("mlist");
+  var mvol=document.getElementById("mvol");
+  var mtoggle=document.getElementById("mtoggle");
+  var mfile=document.getElementById("mfile");
+  var startBtn=document.getElementById("mstart");
+  var pvMusic=document.getElementById("pvMusic");
+
+  var PREFERRED=MUSIC_SLOTS[0][0];          // 首选 song1.mp3（提前定义，避免时序问题）
+  var serverList=[], curUrl=null, userUrl=null;
+  var curIdx=0;             // 当前在第几首（顺序播放的核心状态）
+  var started=false;        // 是否曾经成功出声
+  var wantPlay=true;        // 用户意图：想听（false = 用户主动暂停）
+  var detecting=true;       // 音乐文件探测中
+  var userPaused=false;     // 用户主动暂停（区别于被系统/浏览器打断）
+
+  function volNow(){ return (+mvol.value/100)*0.6; }
+
+  /* ★ 并行探测：
+     原来是一首一首 await，12 个序号 × 最多 3 个后缀 = 最多 36 次串行往返。
+     手机上每次往返 50~150ms → 探测就要 2~5 秒，音乐迟迟不响。
+     现在并发 6 个，同时保留"连空 2 个序号就收工"的规则省请求。 */
+  var MCONC=6;
+
+  /* 并行跑 [from,to) 区间，每个序号依次试 sufs 里的后缀（ES5 回调版）*/
+  function roundRange(list, found, from, to, sufs, done){
+    var cursor=from, running=0, finished=0;
+    var total=Math.max(to-from,0);
+    if(total<=0){ done(); return; }
+    function one(){
+      if(cursor>=to) return;
+      var i=cursor++;
+      if(found[i]){ finished++; check(); return one(); }
+      running++;
+      trySuffix(i, 0);
+    }
+    function trySuffix(i, j){
+      if(j>=sufs.length){ running--; finished++; check(); return one(); }
+      exists(list[i][sufs[j]], function(ok){
+        if(ok){ found[i]=list[i][sufs[j]]; running--; finished++; check(); return one(); }
+        trySuffix(i, j+1);
+      });
+    }
+    function check(){ if(finished>=total) done(); }
+    var lanes=Math.min(MCONC, total);
+    for(var w=0;w<lanes;w++) one();
+  }
+
+  function probeSeq(list, maxN, done){
+    var N=Math.min(list.length, maxN||list.length);
+    var found=new Array(N);
+    for(var i=0;i<N;i++) found[i]=null;      /* 不用 .fill()（ES6）*/
+
+    var BLOCK=6, st=0, lastHit=-1, stopped=false;
+    function step(){
+      if(st>=N || stopped){ return afterBlocks(); }
+      var end=Math.min(st+BLOCK, N);
+      roundRange(list, found, st, end, [0], function(){
+        var gap=0;
+        for(var i=0;i<end;i++){
+          if(found[i]){ gap=0; lastHit=i; }
+          else { gap++; if(gap>=2){ stopped=true; break; } }
+        }
+        st=end;
+        step();
+      });
+    }
+    /* 补充：只对"中间缺了一个"的序号试其余后缀 */
+    function afterBlocks(){
+      var miss=[];
+      for(var k=0;k<=lastHit;k++) if(!found[k]) miss.push(k);
+      var m2=0;
+      (function tryMiss(){
+        if(m2>=miss.length){ done(found); return; }
+        var i2=miss[m2++];
+        var j2=1;
+        (function trySuf(){
+          if(j2>=list[i2].length){ tryMiss(); return; }
+          var jj=j2; j2++;
+          exists(list[i2][jj], function(ok){
+            if(ok){ found[i2]=list[i2][jj]; tryMiss(); return; }
+            trySuf();
+          });
+        })();
+      })();
+    }
+    step();
+  }
+
+  function detect(){
+    detecting=true; paint();
+    probeSeq(MUSIC_SLOTS, MUSIC_MAX, function(hitArr){
+      var found=[], gap=0;
+      for(var i=0;i<hitArr.length;i++){
+        if(hitArr[i]){ found.push(hitArr[i]); gap=0; }
+        else { gap++; if(gap>=2) break; }        // 连空 2 个 → 后面没有了
       }
-    },false);
+      /* 一个 song 都没找到 → 再去试旧命名 bgm.mp3 / music.mp3 */
+      if(!found.length){
+        probeSeq(MUSIC_FALLBACK, MUSIC_FALLBACK.length, function(fbArr){
+          for(var k=0;k<fbArr.length;k++){ if(fbArr[k]){ found.push(fbArr[k]); break; } }
+          finishDetect(found);
+        });
+        return;
+      }
+      finishDetect(found);
+    });
   }
-  return aud;
-}
 
-function setT(t){ var e=document.getElementById("mT"); if(e) e.textContent=t; }
-var _skipGuard=false;
-function fmt(t){
-  if(!t||isNaN(t)||!isFinite(t)) return "00:00";
-  var m=Math.floor(t/60), sec=Math.floor(t%60);
-  return (m<10?"0":"")+m+":"+(sec<10?"0":"")+sec;
-}
-function onTime(){
-  var a=aud; if(!a) return;
-  var d=a.duration, c=a.currentTime;
-  var bar=document.getElementById("mBar");
-  var fill=bar?bar.firstChild:null;
-  if(fill&&d&&isFinite(d)&&d>0){
-    var pc=Math.max(0,Math.min(100,c/d*100));
-    if(_dragging!==true) fill.style.width=pc.toFixed(2)+"%";
-  }
-  var tt=document.getElementById("mTime");
-  if(tt) tt.textContent=fmt(c)+" / "+fmt(d);
-}
-/* 记忆上次播到哪首：下次打开从那首开始（不自动播放，浏览器会拦） */
-function loadLast(){ try{ var v=localStorage.getItem("nexus_mi");
-  var n=v?parseInt(v,10):0; return (isNaN(n)||n<0)?0:n; }catch(e){ return 0; } }
-function saveLast(){ try{ localStorage.setItem("nexus_mi",String(mi)); }catch(e){} }
-
-function play(){
-  var a=ensureAud();
-  if(!a||tracks.length===0) return;
-  try{
-    a.src=tracks[mi]+"?_v="+V;
-    /* 只有一首时才用 loop；多首交给 ended 顺序推进 */
-    a.loop=(tracks.length===1);
-    var pr=a.play();
-    if(pr&&pr["catch"]){ pr["catch"](function(){}); }
-    playing=true;
-    mMain.innerHTML="❚❚"; mMain.className="mbtn playing";
-    setT(trackLabel(mi));
-    document.getElementById("mName").className="on";
-    saveLast(); markList();
-  }catch(e){ playing=false; }
-}
-function pause(){
-  if(aud){ try{ aud.pause(); }catch(e){} }
-  playing=false; mMain.innerHTML="▶"; mMain.className="mbtn";
-}
-function goTo(i,autoplay){
-  if(tracks.length===0) return;
-  mi=((i%tracks.length)+tracks.length)%tracks.length;
-  saveLast(); markList();
-  setT(trackLabel(mi));
-  if(autoplay||playing) play();
-}
-function nextTrack(auto){
-  if(tracks.length===0) return;
-  goTo(mi+1, auto||playing);
-}
-function prevTrack(){
-  if(tracks.length===0) return;
-  /* 常见播放器逻辑：播过 3 秒以上，按"上一首"是重头播当前这首 */
-  if(aud&&aud.currentTime>3){ try{ aud.currentTime=0; }catch(e){} return; }
-  goTo(mi-1, playing);
-}
-/* ══════════ 进度条拖动 ══════════ */
-var _dragging=false;
-(function(){
-  var bar=document.getElementById("mBar");
-  if(!bar) return;
-  function ratio(ev){
-    var r=bar.getBoundingClientRect();
-    var x=(ev.touches&&ev.touches[0])?ev.touches[0].clientX:ev.clientX;
-    return Math.max(0,Math.min(1,(x-r.left)/r.width));
-  }
-  function apply(k){
-    var fill=bar.firstChild; if(fill) fill.style.width=(k*100).toFixed(2)+"%";
-    if(aud&&aud.duration&&isFinite(aud.duration)){
-      try{ aud.currentTime=k*aud.duration; }catch(e){}
+  function finishDetect(found){
+    serverList=found;
+    detecting=false;
+    if(serverList.length && !userUrl){
+      var at=serverList.indexOf(curUrl);
+      if(at<0){ curIdx=0; if(wantPlay) playIdx(0); }
+      else curIdx=at;
     }
+    if(!serverList.length && startBtn && !started) startBtn.classList.add("hide");
+    paint();
   }
-  function down(e){ if(!aud||!aud.duration) return;
-    _dragging=true; apply(ratio(e)); e.preventDefault(); }
-  function move(e){ if(!_dragging) return; apply(ratio(e)); e.preventDefault(); }
-  function up(){ _dragging=false; }
-  bar.addEventListener("mousedown",down,false);
-  document.addEventListener("mousemove",move,false);
-  document.addEventListener("mouseup",up,false);
-  bar.addEventListener("touchstart",down,{passive:false});
-  bar.addEventListener("touchmove",move,{passive:false});
-  bar.addEventListener("touchend",up,false);
-})();
-/* ══════════ 播放列表 ══════════ */
-function markList(){
-  var L=document.getElementById("mPanelL");
-  if(!L) return;
-  var bs=L.getElementsByTagName("button"), i;
-  for(i=0;i<bs.length;i++) bs[i].className=(i===mi)?"trk cur":"trk";
-}
-function buildList(){
-  var L=document.getElementById("mPanelL");
-  if(!L) return;
-  L.innerHTML="";
-  var i,b;
-  for(i=0;i<tracks.length;i++){
-    b=document.createElement("button");
-    b.className="trk";
-    b.innerHTML="<i>"+((i+1)<10?"0":"")+(i+1)+"</i>";
-    b.appendChild(document.createTextNode(niceName(tracks[i],i)));
-    b.setAttribute("data-i",String(i));
-    L.appendChild(b);
+
+  /* ── 顺序播放核心 ── */
+  function playIdx(i){
+    if(!serverList.length) return;
+    if(userUrl) userUrl=null;              // 切回服务器列表
+    curIdx=((i % serverList.length)+serverList.length)%serverList.length;
+    play(serverList[curIdx]);
   }
-  L.onclick=function(ev){
-    var t=ev.target, i;
-    while(t&&t!==L&&t.tagName!=="BUTTON") t=t.parentNode;
-    if(!t||t===L) return;
-    i=parseInt(t.getAttribute("data-i"),10);
-    if(isNaN(i)) return;
-    goTo(i,true);
-  };
-  markList();
-}
-var mPrev=document.getElementById("mPrev");
-var mList=document.getElementById("mList");
-var mPanel=document.getElementById("mPanel");
-function toggleList(){
-  if(tracks.length===0) return;
-  var on=mPanel.className.indexOf("on")>=0;
-  mPanel.className=on?"":"on";
-  mList.className="mbtn sm"+(on?"":" on");
-}
-mMain.onclick=function(){
-  if(tracks.length===0) return;
-  if(playing) pause(); else play();
-};
-mNext.onclick=function(){ if(tracks.length>1) nextTrack(false); };
-if(mPrev) mPrev.onclick=function(){ if(tracks.length>1) prevTrack(); };
-if(mList) mList.onclick=toggleList;
+  function next(){ if(serverList.length) playIdx(curIdx+1); }
+  function prev(){ if(serverList.length) playIdx(curIdx-1); }
 
-/* ══════════ 问候 + 造访次数 + 停留时长 ══════════ */
-/* 主页该有的"时间锚点"：进来就知道现在几点、这是第几次来、待了多久。
-   这类信息让页面有"常客感"，也是回访的理由。 */
-(function(){
-  var el=document.getElementById("greet");
-  if(!el) return;
-  var h=new Date().getHours(), g;
-  if(h<5)       g="夜深了";
-  else if(h<11) g="早上好";
-  else if(h<14) g="中午好";
-  else if(h<18) g="下午好";
-  else if(h<23) g="晚上好";
-  else          g="夜深了";
-  var n=1;
-  try{
-    n=(parseInt(localStorage.getItem("nexus_visits"),10)||0)+1;
-    localStorage.setItem("nexus_visits",String(n));
-  }catch(e){}
-  /* 日期：10月22日 星期四 */
-  var WK=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
-  var d=new Date();
-  var dEl=document.getElementById("greetDate");
-  var mEl=document.getElementById("greetMsg");
-  if(dEl) dEl.textContent=(d.getMonth()+1)+"月"+d.getDate()+"日 "+WK[d.getDay()];
+  // ★ 一首播完自动接下一首（最后一首之后回到第一首）
+  audio.addEventListener("ended",function(){
+    if(userPaused || !wantPlay) return;
+    if(userUrl){                            // 本机选的歌：单曲循环
+      audio.currentTime=0;
+      var p=audio.play(); if(p&&p.catch) p.catch(function(){});
+      return;
+    }
+    if(serverList.length>1){ next(); }
+    else if(serverList.length===1){         // 只有一首 → 循环它
+      audio.currentTime=0;
+      var q=audio.play(); if(q&&q.catch) q.catch(function(){});
+    }
+  });
 
-  var t0=Date.now();
-  function two(x){ return (x<10?"0":"")+x; }
-  /* ★ 每秒只重写"停留时长"那一段，日期和造访次数不动 ——
-       整块 innerHTML 每秒重写会让浏览器反复重排，是没必要的浪费。 */
-  function tick(){
-    var sc=Math.floor((Date.now()-t0)/1000);
-    if(mEl) mEl.innerHTML=g+" · 第 <b>"+n+"</b> 次造访 · 停留 "
-      +two(Math.floor(sc/60))+":"+two(sc%60);
+  function paint(){
+    mlist.innerHTML="";
+    if(detecting){
+      var w=document.createElement("div");
+      w.className="mitem"; w.style.cursor="default";
+      w.textContent="（正在检测音乐文件…）";
+      mlist.appendChild(w);
+    }
+    if(!detecting && !serverList.length && !userUrl){
+      var d=document.createElement("div");
+      d.className="mitem"; d.style.cursor="default";
+      d.textContent="（未找到音乐文件）";
+      mlist.appendChild(d);
+    }
+    serverList.forEach(function(u,i){
+      var el=document.createElement("div");
+      el.className="mitem"+(i===curIdx&&!userUrl?" on":"");
+      el.textContent="🎼 "+(i+1)+"  ·  "+u;
+      el.onclick=function(){ userUrl=null; wantPlay=true; userPaused=false; playIdx(i); };
+      mlist.appendChild(el);
+    });
+    if(userUrl){
+      var d2=document.createElement("div");
+      d2.className="mitem on";
+      d2.textContent="🎧 我的音乐（本机）";
+      d2.onclick=function(){ wantPlay=true; play(userUrl); };
+      mlist.appendChild(d2);
+    }
+    // 预览层里的按钮同步状态
+    if(pvMusic) pvMusic.textContent = (!audio.paused && !userPaused) ? "⏸" : "🎵";
+    // 当前曲目 + 顺序信息
+    var nowEl=document.getElementById("mnow");
+    if(nowEl){
+      if(userUrl){
+        nowEl.innerHTML='<span class="lb">正在播放（本机）</span><span class="nm">我的音乐</span>';
+      }else if(serverList.length){
+        nowEl.innerHTML='<span class="lb">正在播放 '+(curIdx+1)+' / '+serverList.length+
+                        '</span><span class="nm">'+serverList[curIdx]+'</span>';
+      }else if(detecting){
+        nowEl.innerHTML='<span class="lb">正在播放</span><span class="nm">检测中…</span>';
+      }else{
+        nowEl.innerHTML='<span class="lb">正在播放</span><span class="nm">暂无音乐</span>';
+      }
+    }
+    var sq=document.getElementById("mseq");
+    if(sq) sq.textContent = serverList.length>1 ? ("顺序播放 · 共 "+serverList.length+" 首") : "顺序播放";
   }
-  tick();
-  setInterval(tick,1000);
-})();
 
-/* ══════════ 返回顶部 ══════════ */
-/* ★ 关键：本页的滚动容器是 #wrap（body/html 都是 overflow:hidden），
-     不是 window。监听 window 的 scroll 永远不触发，按钮就永远不出现。
-     必须监听 #wrap 并改 #wrap.scrollTop。 */
-(function(){
-  var t=document.getElementById("top");
-  var w=document.getElementById("wrap");
-  if(!t||!w) return;
-  function upd(){ t.className=(w.scrollTop>360)?"on":""; }
-  w.addEventListener("scroll",upd,{passive:true});
-  window.addEventListener("resize",upd,false);
-  t.onclick=function(){
-    var y=w.scrollTop, step;
-    if(y<=0) return;
-    /* 平滑滚动（不用 scrollTo({behavior}) —— 老内核不支持且不是 ES5 写法） */
-    step=Math.max(14,Math.round(y/16));
-    (function go(){
-      y-=step;
-      if(y<=0){ w.scrollTop=0; return; }
-      w.scrollTop=y;
-      setTimeout(go,16);
-    })();
-  };
-  upd();
-})();
-
-/* ══════════ 底部数据条 ══════════ */
-(function(){
-  var el=document.getElementById("tickIn");
-  if(!el) return;
-  var hex="0123456789ABCDEF",s="",i,j;
-  for(i=0;i<90;i++){
-    for(j=0;j<4;j++) s+=hex.charAt(Math.floor(Math.random()*16));
-    s+=" · ";
+  function play(u){
+    if(!u) return;
+    wantPlay=true; userPaused=false; allFailed=false;   // 用户/系统主动播放 → 清除失败态
+    var same = (curUrl===u) && audio.src && audio.src.indexOf(u)>-1;
+    // 同步索引：这样点列表/上下曲/自动播放三种入口状态都一致
+    var at=serverList.indexOf(u);
+    if(at>-1) curIdx=at;
+    curUrl=u;
+    // BUG修复：重复点同一首不要再换 src，否则每次都从头开始
+    if(!same || !audio.src){
+      /* ★ BUG 修复：播放 src 不再加时间戳。
+         加了之后每首歌每次都是新 URL → 浏览器缓存永远不命中，
+         循环回来要重新下载整首 mp3（几 MB），手机上尤其明显。 */
+      audio.src = u;
+    }
+    audio.volume=volNow();
+    var p=audio.play();
+    if(p&&p.catch) p.catch(function(){ /* 失败交给 watchdog / 手势兜底 */ });
+    mBtn.classList.remove("off"); mBtn.classList.add("spin");
+    mtoggle.textContent="⏸ 暂停";
+    if(startBtn) startBtn.classList.remove("show");
+    paint();
   }
-  el.textContent=s+s;
-})();
+  function stop(byUser){
+    audio.pause();
+    if(byUser){ wantPlay=false; userPaused=true; }
+    mBtn.classList.add("off"); mBtn.classList.remove("spin");
+    mtoggle.textContent="▶ 播放";
+    paint();
+  }
 
-/* 信号强度动画 */
-(function(){
-  var bars=document.querySelectorAll("#sig i");
-  if(!bars.length) return;
+  /* ── 事件：只有真的出声才算成功 ── */
+  audio.addEventListener("playing",function(){
+    started=true; errStreak=0; allFailed=false;
+    mBtn.classList.remove("off"); mBtn.classList.add("spin");
+    mtoggle.textContent="⏸ 暂停";
+    if(startBtn) startBtn.classList.remove("show");
+    GEST.forEach(function(e){ document.removeEventListener(e,kick); });
+    paint();
+  });
+  /* ★ 某一首加载失败（文件损坏 / 名字错了 / 服务器 404）时，
+     原来的代码什么都不做 —— 音乐就永久卡死在这一首，后面几首都放不了。
+     这里自动跳下一首；整圈都失败才停下来并给出手动入口。 */
+  var errStreak=0, allFailed=false;
+  audio.addEventListener("error",function(){
+    started=false;
+    mBtn.classList.add("off"); mBtn.classList.remove("spin");
+    mtoggle.textContent="▶ 播放";
+    paint();
+    if(userPaused || !wantPlay) return;
+    if(userUrl) return;                 // 本机选的文件坏了 → 不自动跳
+    if(allFailed){
+      // 整圈都失败过：只保留手动入口，不再自动轮播
+      // （否则 watchdog 每 2.5 秒重试 → play() 又把按钮 remove 掉，用户永远看不到入口）
+      if(startBtn) startBtn.classList.add("show");
+      return;
+    }
+    if(serverList.length>1){
+      errStreak++;
+      if(errStreak<=serverList.length){
+        setTimeout(function(){ next(); }, 450);   // 稍等再跳，避免瞬间连刷
+      }else{
+        errStreak=0; allFailed=true;
+        // 全坏了 → 给手动入口，并把手势兜底重新挂上
+        // （播放成功时 GEST 会被移除，不重绑的话用户点屏幕也没反应）
+        if(startBtn) startBtn.classList.add("show");
+        GEST.forEach(function(e){
+          document.addEventListener(e,kick,{passive:true});
+        });
+      }
+    }else{
+      // 只有一首且失败 → 把手势兜底和按钮都恢复，用户还能再试
+      if(startBtn) startBtn.classList.add("show");
+      GEST.forEach(function(e){
+        document.addEventListener(e,kick,{passive:true});
+      });
+    }
+  });
+  // 被系统/切后台打断（不是用户点的）→ 标记，交给 watchdog 恢复
+  audio.addEventListener("pause",function(){
+    if(userPaused) return;             // 用户主动暂停，不自动恢复
+    mBtn.classList.add("off"); mBtn.classList.remove("spin");
+    mtoggle.textContent="▶ 播放";
+    paint();
+  });
+
+  /* ══ 自动播放策略（按成功率依次尝试）══
+     注意：iOS/微信要求 play() 必须在手势的同步调用栈里，中间不能 await。 */
+  var GEST=["touchstart","pointerdown","click","keydown","wheel","scroll","mousemove"];
+
+  // 取当前该播哪首；顺带把 curIdx 同步好，
+  // 这样"自动播放 / 看门狗 / 点列表 / 上下曲"几条路径的索引永远一致
+  function target(){
+    var u = curUrl || serverList[curIdx] || serverList[0] || PREFERRED;
+    var at=serverList.indexOf(u);
+    if(at>-1) curIdx=at;
+    return u;
+  }
+  function syncPlay(){
+    if(!wantPlay || userPaused) return;
+    var u=target(); curUrl=u;
+    try{
+      if(!audio.src || audio.src.indexOf(u)<0) audio.src=u;
+      audio.volume=volNow();
+      var p=audio.play();
+      if(p&&p.catch) p.catch(function(){});
+    }catch(e){}
+  }
+  // 静音试探：部分内核允许静音自动播放，成功后解除静音 = 变相自动播放
+  function silentProbe(){
+    try{
+      var u=target();
+      if(!audio.src || audio.src.indexOf(u)<0) audio.src=u;
+      audio.muted=true; audio.volume=0;
+      var p=audio.play();
+      if(p&&p.then){
+        p.then(function(){
+          setTimeout(function(){
+            audio.muted=false; audio.volume=volNow();
+            audio.play().catch(function(){});
+          },60);
+        }).catch(function(){ audio.muted=false; audio.volume=volNow(); });
+      }else{ audio.muted=false; audio.volume=volNow(); }
+    }catch(e){}
+  }
+  function kick(){ syncPlay(); }
+
+  // ① 微信解锁
+  function wxUnlock(){
+    try{
+      if(typeof WeixinJSBridge!=="undefined" && WeixinJSBridge.invoke){
+        WeixinJSBridge.invoke("getNetworkType",{},function(){ syncPlay(); });
+      }
+    }catch(e){}
+  }
+  if(typeof WeixinJSBridge!=="undefined"){ wxUnlock(); }
+  else { document.addEventListener("WeixinJSBridgeReady",wxUnlock,false); }
+
+  // ②③ 加载后立刻尝试
+  function tryAuto(){
+    if(started||userPaused) return;
+    silentProbe();
+    setTimeout(function(){ syncPlay(); }, 260);
+    setTimeout(function(){ syncPlay(); }, 900);
+    setTimeout(function(){
+      if(!started){
+        GEST.forEach(function(e){ document.addEventListener(e,kick,{passive:true}); });
+        if(startBtn && !userPaused) startBtn.classList.add("show");
+      }
+    }, 1600);
+  }
+  if(document.readyState==="complete"||document.readyState==="interactive") tryAuto();
+  else addEventListener("DOMContentLoaded",tryAuto);
+  addEventListener("load",function(){
+    setTimeout(function(){ syncPlay(); },400);
+  });
+
+  // ④ 回到前台 / 网络恢复 → 自动续播
+  document.addEventListener("visibilitychange",function(){
+    if(!document.hidden){ setTimeout(syncPlay,120); setTimeout(syncPlay,700); }
+  });
+  addEventListener("focus",function(){ setTimeout(syncPlay,150); });
+  addEventListener("online",function(){ setTimeout(syncPlay,300); });
+
+  // ⑤ 看门狗：只要用户想听、却没在响，就不断尝试恢复（解决手机切后台/被系统打断）
   setInterval(function(){
-    var lv=3+Math.floor(Math.random()*2);
-    var i;
-    for(i=0;i<bars.length;i++){
-      bars[i].className=(i<lv)?"on":"";
+    if(userPaused) return;
+    if(!wantPlay) return;
+    if(document.hidden) return;
+    // 播完了但 ended 没接上（极端情况）→ 手动续下一首
+    if(audio.ended){
+      if(userUrl){
+        audio.currentTime=0;
+        var r=audio.play(); if(r&&r.catch) r.catch(function(){});
+      }else if(serverList.length>1){ next(); }
+      else if(serverList.length===1){
+        audio.currentTime=0;
+        var s=audio.play(); if(s&&s.catch) s.catch(function(){});
+      }
+      return;
     }
-  },2600);
-})();
-
-/* 副标题文案（写在 data-t 里，由 JS 填入，避免直接改 HTML 时漏字）*/
-(function(){
-  var el=document.getElementById("sub");
-  if(!el) return;
-  var t=el.getAttribute("data-t");
-  if(t&&!el.textContent) el.textContent=t;
-})();
-
-/* ══════════ 每日一句 ══════════ */
-/* ┌──────────────────────────────────────────────────────────┐
-   │  想换成你们自己的话？直接改下面这个列表就行。             │
-   │  加多少句都行，会自动去重、自动不重复轮播。               │
-   └──────────────────────────────────────────────────────────┘ */
-var QUOTES=[
-  "愿你走很远的路，最后找到的，是自己",
-  "不必着急，最好的总在不经意间出现",
-  "你只管努力，剩下的交给时间",
-  "生活明朗，万物可爱，人间值得，未来可期",
-  "所有的努力都不会白费，它们只是在等一个时机",
-  "慢慢来，谁还不是在跌跌撞撞中长大",
-  "你比你以为的，更勇敢一点",
-  "前路漫漫亦灿灿，往事堪堪亦澜澜",
-  "你若盛开，清风自来",
-  "星光不问赶路人，时光不负有心人",
-  "熬过无人问津的日子，才有诗和远方",
-  "万物皆有裂痕，那是光照进来的地方",
-  "你走的每一步，都在为未来铺路",
-  "风吹雨打是常态，苦尽甘来是奖励",
-  "生活不是等着暴风雨过去，而是学会在雨中起舞",
-  "你的坚持，终将美好",
-  "愿你保持热爱，奔赴山海",
-  "高峰只对攀登它的人才有意义",
-  "含泪播种的人，一定能含笑收获",
-  "与其临渊羡鱼，不如退而结网",
-  "只要有明天，今天就永远是起跑线",
-  "不要因为走得太远，忘了为什么出发",
-  "路是自己选的，没有输赢，只有值不值得",
-  "把努力当成一种习惯，而不是一时的热血",
-  "你所经历的，都会成为你生命里的光",
-  "愿你眼中总有光，活成自己想要的模样",
-  "每一个不曾起舞的日子，都是对生命的辜负",
-  "在最深的夜里，才能看见最亮的星",
-  "你不必很厉害才能开始，但要开始才能很厉害",
-  "所有坚持，都会在某个转角与你不期而遇",
-  "愿你一生温暖纯良，不舍爱与自由",
-  "别回头，身后的灯再亮，也不是归处",
-  "今天的太阳，比昨天的大",
-  "你正在做的事，正在悄悄改变你",
-  "允许自己慢一点，但别停下",
-  "运气是努力的副产品",
-  "所有的好运，都藏在没放弃的那一刻",
-  "你值得这世间所有的温柔"
-];
-
-/* ★ 去重：万一列表里有重复的句子，只保留第一次出现的（保证"不重复"是真的） */
-(function(){
-  var seen={},out=[],i,k;
-  for(i=0;i<QUOTES.length;i++){
-    k=QUOTES[i];
-    if(!seen[k]){ seen[k]=1; out.push(k); }
-  }
-  if(out.length!==QUOTES.length) QUOTES=out;
-})();
-
-var QKEY="nexus_qused", QLAST="nexus_qlast";
-function qLoad(){
-  try{
-    var v=localStorage.getItem(QKEY);
-    if(!v) return [];
-    var a=v.split(","),o=[],i,n;
-    for(i=0;i<a.length;i++){ n=parseInt(a[i],10); if(!isNaN(n)) o.push(n); }
-    return o;
-  }catch(e){ return []; }
-}
-function qSave(u){
-  try{ localStorage.setItem(QKEY,u.join(",")); }catch(e){}
-}
-/* ★ 不重复的核心：从"还没显示过"的句子里随机挑。
-     全部显示完一轮后自动清空重来，且新一轮开头不会撞上刚显示的那句。 */
-function pickQuote(){
-  var i,used=qLoad(),pool=[],last=-1;
-  try{ last=parseInt(localStorage.getItem(QLAST),10); if(isNaN(last)) last=-1; }catch(e){}
-  for(i=0;i<QUOTES.length;i++){ if(used.indexOf(i)<0) pool.push(i); }
-  if(!pool.length){
-    for(i=0;i<QUOTES.length;i++){ if(i!==last) pool.push(i); }
-    if(!pool.length) pool=[0];
-    used=[];
-  }
-  var idx=pool[Math.floor(Math.random()*pool.length)];
-  used.push(idx);
-  if(used.length>QUOTES.length) used=used.slice(-QUOTES.length);
-  qSave(used);
-  try{ localStorage.setItem(QLAST,String(idx)); }catch(e){}
-  return idx;
-}
-var _qi=-1;
-function showQuote(){
-  var el=document.getElementById("quote");
-  if(!el||!QUOTES.length) return;
-  var i=pickQuote();
-  _qi=i;
-  el.innerHTML="<em>「</em>"+QUOTES[i]+"<em>」</em>";
-}
-
-/* 每日一句（放到最后淡入，不抢标题的风头） */
-try{ showQuote(); }catch(e){}
-
-/* ★ 渐变文字的兜底检测：
-     background-clip:text 是不少老内核（部分安卓 4.x WebView）不支持的特性。
-     不支持时 color:transparent 会让标题【完全看不见】，页面像没标题。
-     这里运行时探测一次，不支持就给 <html> 打 .noclip，退回纯色 + 外发光。 */
-(function(){
-  try{
-    var d=document.createElement("div"), ok=false;
-    d.style.backgroundClip="text";
-    if(d.style.backgroundClip==="text") ok=true;
-    if(!ok){ d.style.webkitBackgroundClip="text";
-      if(d.style.webkitBackgroundClip==="text") ok=true; }
-    if(!ok){
-      var h=document.documentElement;
-      h.className=(h.className?h.className+" ":"")+"noclip";
+    if(audio.paused){
+      var u=target();
+      if(!audio.src || audio.src.indexOf(u)<0) audio.src=u;
+      audio.volume=volNow();
+      var p=audio.play();
+      if(p&&p.catch) p.catch(function(){});
     }
-  }catch(e){}
+  }, 2500);
+
+  // ⑥ 显眼的开启按钮
+  if(startBtn){
+    startBtn.addEventListener("click",function(e){ e.stopPropagation(); wantPlay=true; userPaused=false; kick(); });
+    startBtn.addEventListener("touchstart",function(e){ e.stopPropagation(); wantPlay=true; userPaused=false; kick(); },{passive:true});
+  }
+
+  /* ── 面板交互 ── */
+  mBtn.onclick=function(){ panel.classList.toggle("on"); };
+  if(pvMusic) pvMusic.onclick=function(){
+    if(!audio.paused){ stop(true); }
+    else {
+      wantPlay=true; userPaused=false;
+      // 与 mtoggle 保持一致：从"当前这首"继续，而不是从头
+      if(userUrl) play(userUrl); else playIdx(curIdx);
+    }
+  };
+  mtoggle.onclick=function(){
+    if(!audio.paused){ stop(true); }
+    else {
+      wantPlay=true; userPaused=false;
+      if(userUrl) play(userUrl);
+      else playIdx(curIdx);            // 从当前这首继续，而不是从头
+    }
+  };
+  // 上一首 / 下一首
+  var bPrev=document.getElementById("mPrev"), bNext=document.getElementById("mNext");
+  if(bPrev) bPrev.onclick=function(){ wantPlay=true; userPaused=false; prev(); };
+  if(bNext) bNext.onclick=function(){ wantPlay=true; userPaused=false; next(); };
+  mvol.oninput=function(){ audio.volume=volNow(); };
+  mvol.onchange=function(){ audio.volume=volNow(); };
+  audio.volume=volNow();                       // 初始音量即时生效
+  mfile.onchange=function(){
+    var f=mfile.files&&mfile.files[0];
+    if(!f) return;
+    if(userUrl && /^blob:/.test(userUrl)) URL.revokeObjectURL(userUrl);
+    userUrl=URL.createObjectURL(f);
+    wantPlay=true; userPaused=false;
+    play(userUrl);
+  };
+
+  detect();
 })();
 
-/* ══════════ 时钟 ══════════ */
-function tickClock(){
-  var d=new Date(),hh=d.getHours(),mm=d.getMinutes(),ss=d.getSeconds();
-  var s=(hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
-  var el=document.getElementById("clock");
-  if(el) el.textContent=s;
-}
+scan();
+</script>
 
-/* ══════════ 主循环 ══════════ */
-var last=0,frames=0,fxOn=false,fxRaf=0;
-function loop(now){
-  frames++;
-  if(!last) last=now;
-  var dt=(now-last)/1000;
-  last=now;
-  if(dt>0.05) dt=0.05;
-  if(dt<0) dt=0;
-  drawFx(dt);
-  if(fxOn) fxRaf=requestAnimationFrame(loop);
-}
-/* 预览打开时把整个渲染循环停掉，主页面 0% CPU */
-function startFx(){
-  if(fxOn) return;
-  fxOn=true; last=0;
-  fxRaf=requestAnimationFrame(loop);
-}
-function stopFx(){
-  fxOn=false;
-  if(fxRaf){ try{ cancelAnimationFrame(fxRaf); }catch(e){} fxRaf=0; }
-}
+<!-- ══════════════════════════════════════════════════════
+     独立增强模块：只做「问候语」和「管理区折叠」两件事。
+     全程 try/catch 包裹，即使出错也绝不影响上面的主功能。
+     ══════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  "use strict";
+  try{
+    // ① 按时间变化的问候 + 今天的日期
+    var g=document.getElementById("greet");
+    if(g){
+      var d=new Date(), h=d.getHours(), t;
+      if(h<5)       t="夜深了，早点休息";
+      else if(h<9)  t="早上好呀";
+      else if(h<11) t="上午好，记得喝水";
+      else if(h<14) t="中午好，好好吃饭";
+      else if(h<18) t="下午好";
+      else if(h<22) t="晚上好";
+      else          t="夜深了，早点休息";
+      var wk=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][d.getDay()];
+      var slot=g.getElementsByTagName("span");
+      // slot[0] 是圆点，slot[1] 才是文字
+      if(slot && slot[1]) slot[1].textContent=t+"　·　"+(d.getMonth()+1)+"月"+d.getDate()+"日 "+wk;
+    }
 
-/* ══════════ 缩放拦截 ══════════ */
-function stop(e){ e.preventDefault(); }
-document.addEventListener("touchmove",function(e){
-  if(e.touches&&e.touches.length>1) stop(e);
-},{passive:false});
-var gs=["gesturestart","gesturechange","gestureend"];
-for(var gi=0;gi<gs.length;gi++){
-  document.addEventListener(gs[gi],stop,{passive:false});
-}
-
-/* ══════════ 启动 ══════════ */
-measure();
-tickClock();
-setInterval(tickClock,1000);
-scan(1);
-probeMusic();
-startFx();
-
-window.addEventListener("resize",function(){ measure(); });
-window.addEventListener("orientationchange",function(){ setTimeout(measure,280); });
-
-window.__x={
-  get found(){ return found; },
-  get tracks(){ return tracks; },
-  get playing(){ return playing; },
-  get pvOn(){ return pvEl.className==="on"; },
-  get stars(){ return stars.length; },
-  get links(){ return links.length; },
-  get dust(){ return dust.length; },
-  get ripples(){ return ripples.length; },
-  get rings(){ return rings.length; },
-  get sparks(){ return sparks.length; },
-  get paused(){ return paused; },
-  get frames(){ return frames; },
-  get gal(){ return gal; },
-  get sfx(){ return SFX; },
-  get coverDir(){ return COVER_DIR; },
-  get coverExt(){ return COVER_EXT; },
-  get pvPushed(){ return pvPushed; },
-  get debug(){ return DBG; },
-  burst:burst,
-  openPv:function(i){ openPv(found[i]); },
-  closePv:closePv,
-  next:function(){ nextTrack(false); },
-  prev:function(){ prevTrack(); },
-  goTo:goTo,
-  get mi(){ return mi; },
-  get aud(){ return aud; },
-  get quotes(){ return QUOTES; },
-  get qi(){ return _qi; }
-};
+    // ② 管理区折叠（"重新扫描 / 自检" 默认收起，保持页面浪漫干净）
+    var tb=document.getElementById("toolBtn");
+    var tw=document.getElementById("tools");
+    if(tb && tw){
+      tb.addEventListener("click",function(){
+        var on=tw.classList.toggle("show");
+        tb.classList.toggle("on",on);
+      });
+    }
+  }catch(e){
+    /* 静默失败：主功能不受影响 */
+  }
 })();
 </script>
 </body>
